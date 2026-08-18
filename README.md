@@ -6,12 +6,17 @@ folders and are not referenced by the UWP project. Only the existing image files
 are linked as package assets; no recovered application code, token handling, stream
 handling, or binary libraries are reused.
 
-## First public release
+## Latest release
 
-`v1.0.7.4` is the first public YourTube UWP release. It includes an ARM Windows 10
-Mobile Developer Mode sideload package for devices running 10.0.15063.0 or later.
-The release assets include the AppX, its public development certificate, the two
+[`v1.0.8.0`](https://github.com/ZuneTracks/YourTube-UWP/releases/tag/v1.0.8.0)
+is the latest public YourTube UWP release. It includes an ARM Windows 10 Mobile
+Developer Mode sideload package for devices running 10.0.15063.0 or later. The
+release assets include the AppX, its public development certificate, the two
 required ARM framework packages, and installation instructions.
+
+This release adds rotation between the last video selected for playback, the latest
+Trending Now result, and a branded YourTube live-tile frame. See
+[CHANGELOG.md](CHANGELOG.md) for the complete release history.
 
 This is not a Microsoft Store or production-signed distribution: the package uses
 the documented `YourTubeDevelopment` temporary development certificate. Do not
@@ -103,12 +108,17 @@ contain platform-specific commands and transfer objects.
 
 ### Trending live tile
 
-After a successful **Trending Now** request, YourTube updates its UWP live tile
-with the leading result's title, channel, region, and YouTube thumbnail. The tile
-reflects the most recently fetched public result and opens the app when tapped.
-It does not fetch or refresh data in the background: automatic polling would need
-a separate UWP background-execution design and must not rely on a stored user API
-key or on the retired WP8 scheduled agent.
+After a successful **Trending Now** request, YourTube persists the leading public
+result and refreshes a UWP live-tile queue. After a user starts playback, that
+queue rotates the last-played video, the latest Trending Now result, and a branded
+YourTube app-icon tile. When there is no last-played metadata, the tile falls back
+to the latest Trending Now result and the branded tile. Only public video metadata
+(ID, title, channel, and thumbnail URI) is stored in local app settings; API keys,
+OAuth tokens, and media URLs are never included.
+
+The tile does not fetch or refresh data in the background: automatic polling would
+need a separate UWP background-execution design and must not rely on a stored user
+API key or on the retired WP8 scheduled agent.
 
 ## Account authorization architecture
 

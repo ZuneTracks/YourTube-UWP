@@ -7,7 +7,7 @@ using YouTube.Uwp.Models;
 
 namespace YouTube.Uwp.Services
 {
-    // Keeps tile rendering separate from the public-data request and the page UI.
+    // Keeps the rotating live-tile queue separate from the page and API flows.
     public sealed class TrendingTileService
     {
         public void Update(VideoSummary video, string regionCode)
@@ -22,27 +22,68 @@ namespace YouTube.Uwp.Services
                 throw new ArgumentException("A trending video title is required.", "video");
             }
 
-            XmlDocument tileXml = new XmlDocument();
-            tileXml.LoadXml(CreateTileXml(video, regionCode));
+            LiveTileStateStore.SaveTrending(video, regionCode);
+            RefreshQueue();
+        }
 
+        public void UpdateLastPlayed(VideoSummary video)
+        {
+            LiveTileStateStore.SaveLastPlayed(video);
+            RefreshQueue();
+        }
+
+        private static void RefreshQueue()
+        {
             TileUpdater updater = TileUpdateManager.CreateTileUpdaterForApplication();
+            updater.EnableNotificationQueue(true);
             updater.Clear();
+
+            VideoSummary lastPlayed = LiveTileStateStore.GetLastPlayed();
+            if (lastPlayed != null)
+            {
+                AddNotification(updater, CreateVideoTileXml(lastPlayed, "Last played"));
+            }
+
+            VideoSummary trending = LiveTileStateStore.GetTrending();
+            if (trending != null)
+            {
+                AddNotification(updater, CreateVideoTileXml(trending, CreateTrendingHeading(LiveTileStateStore.GetTrendingRegion())));
+            }
+
+            if (lastPlayed != null || trending != null)
+            {
+                AddNotification(updater, CreateBrandTileXml());
+            }
+        }
+
+        private static void AddNotification(TileUpdater updater, string xml)
+        {
+            XmlDocument tileXml = new XmlDocument();
+            tileXml.LoadXml(xml);
             updater.Update(new TileNotification(tileXml));
         }
 
-        private static string CreateTileXml(VideoSummary video, string regionCode)
+        private static string CreateVideoTileXml(VideoSummary video, string heading)
         {
             string title = Encode(TrimForTile(video.Title, 96));
             string channel = Encode(TrimForTile(video.ChannelTitle, 48));
-            string heading = Encode(CreateHeading(regionCode));
+            string encodedHeading = Encode(heading);
             string image = CreateImageElement(video.ThumbnailUrl);
 
             StringBuilder tile = new StringBuilder();
             tile.Append("<tile><visual>");
-            AppendBinding(tile, "TileMedium", heading, title, channel, image);
-            AppendBinding(tile, "TileWide", heading, title, channel, image);
+            AppendBinding(tile, "TileMedium", encodedHeading, title, channel, image);
+            AppendBinding(tile, "TileWide", encodedHeading, title, channel, image);
             tile.Append("</visual></tile>");
             return tile.ToString();
+        }
+
+        private static string CreateBrandTileXml()
+        {
+            return "<tile><visual>"
+                + "<binding template=\"TileMedium\" branding=\"name\"><image placement=\"background\" hint-overlay=\"0\" src=\"ms-appx:///Assets/Square150x150Logo.png\" /></binding>"
+                + "<binding template=\"TileWide\" branding=\"name\"><image placement=\"background\" hint-overlay=\"0\" src=\"ms-appx:///Assets/Wide310x150Logo.png\" /></binding>"
+                + "</visual></tile>";
         }
 
         private static void AppendBinding(StringBuilder tile, string template, string heading, string title, string channel, string image)
@@ -71,7 +112,7 @@ namespace YouTube.Uwp.Services
             return "<image placement=\"peek\" hint-overlay=\"28\" src=\"" + Encode(thumbnailUri.AbsoluteUri) + "\" />";
         }
 
-        private static string CreateHeading(string regionCode)
+        private static string CreateTrendingHeading(string regionCode)
         {
             string region = string.IsNullOrWhiteSpace(regionCode)
                 ? string.Empty

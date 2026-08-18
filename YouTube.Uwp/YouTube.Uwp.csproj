@@ -80,6 +80,7 @@
     <Compile Include="Models\VideoCategory.cs" />
     <Compile Include="Models\VideoSummary.cs" />
     <Compile Include="Services\OAuthPkceService.cs" />
+    <Compile Include="Services\LiveTileStateStore.cs" />
     <Compile Include="Services\RuntimeConfiguration.cs" />
     <Compile Include="Services\SecureCredentialStore.cs" />
     <Compile Include="Services\TrendingTileService.cs" />

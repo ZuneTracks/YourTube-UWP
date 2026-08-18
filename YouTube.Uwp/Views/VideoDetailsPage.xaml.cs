@@ -14,12 +14,14 @@ namespace YouTube.Uwp.Views
     public sealed partial class VideoDetailsPage : Page
     {
         private readonly YouTubeDataApiClient client;
+        private readonly TrendingTileService trendingTileService;
         private VideoDetails video;
 
         public VideoDetailsPage()
         {
             InitializeComponent();
             client = new YouTubeDataApiClient(App.Configuration.GetApiKey);
+            trendingTileService = new TrendingTileService();
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -90,6 +92,7 @@ namespace YouTube.Uwp.Views
         {
             if (video != null && !string.IsNullOrWhiteSpace(video.Id))
             {
+                UpdateLastPlayedTile();
                 Frame.Navigate(typeof(VideoPlayerPage), video.Id);
             }
         }
@@ -98,7 +101,28 @@ namespace YouTube.Uwp.Views
         {
             if (video != null && !string.IsNullOrWhiteSpace(video.Id))
             {
+                UpdateLastPlayedTile();
                 await Launcher.LaunchUriAsync(new Uri("https://www.youtube.com/watch?v=" + Uri.EscapeDataString(video.Id)));
+            }
+        }
+
+        private void UpdateLastPlayedTile()
+        {
+            try
+            {
+                trendingTileService.UpdateLastPlayed(video);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                PlaybackStatusText.Text = "Playback started, but Windows did not allow the live tile to update.";
+            }
+            catch (System.Runtime.InteropServices.COMException)
+            {
+                PlaybackStatusText.Text = "Playback started, but the live tile could not be updated.";
+            }
+            catch (ArgumentException)
+            {
+                PlaybackStatusText.Text = "Playback started, but its metadata could not be saved for the live tile.";
             }
         }
     }

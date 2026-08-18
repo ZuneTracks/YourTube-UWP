@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.0.8.0 - Rotating live tile release
+
+- Added a foreground live-tile queue that rotates the last video selected for
+  playback, the latest **Trending Now** result, and the branded YourTube tile.
+- Added local persistence for the last-played and trending tile metadata, so the
+  queue can be rebuilt after subsequent public-data or playback actions.
+- Preserved the existing Trending Now behavior as the fallback: when no
+  last-played video is available, the queue starts with the latest trending result.
+- Stored only non-secret public metadata for tile use (video ID, title, channel,
+  thumbnail URI, and trending region). API keys, OAuth tokens, and media URLs are
+  not persisted or displayed by the tile.
+- Updated the ARM Windows 10 Mobile AppX package version to `1.0.8.0`.
+
 ## v1.0.7.4 - First public release
 
 - Added a Windows 10 Mobile 15063+ ARM UWP app with a Metro-inspired YourTube UI.
