@@ -1,0 +1,19 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Aa]ppPackages/
+
+# Local IDE and user settings
+.vs/
+*.user
+*.suo
+*.userprefs
+
+# Signing material and generated packages
+*.pfx
+*.appx
+*.appxbundle
+*.appxsym
+
+# Local release handoff artifacts
+artifacts/

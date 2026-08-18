@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">ARM</Platform>
+    <ProjectGuid>{A4BF4D44-6B1F-414F-92EC-A7D7F6BB3AB0}</ProjectGuid>
+    <OutputType>AppContainerExe</OutputType>
+    <RootNamespace>YouTube.Uwp</RootNamespace>
+    <AssemblyName>YourTube</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetFrameworkIdentifier>.NETCore</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion>10.0.15063.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.15063.0</TargetPlatformMinVersion>
+    <MinimumVisualStudioVersion>15</MinimumVisualStudioVersion>
+    <ApplicationType>Windows Store</ApplicationType>
+    <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
+    <AppContainerApplication>true</AppContainerApplication>
+    <AppxPackage>true</AppxPackage>
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <AppxBundle>Never</AppxBundle>
+    <AppxBundlePlatforms>ARM</AppxBundlePlatforms>
+    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <PlatformTarget>ARM</PlatformTarget>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\Debug\</OutputPath>
+    <IntermediateOutputPath>obj\Debug\</IntermediateOutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <IntermediateOutputPath>obj\Release\</IntermediateOutputPath>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <OutputPath>bin\ARM\Debug\</OutputPath>
+    <IntermediateOutputPath>obj\ARM\Debug\</IntermediateOutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
+    <PlatformTarget>ARM</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <OutputPath>bin\ARM\Release\</OutputPath>
+    <IntermediateOutputPath>obj\ARM\Release\</IntermediateOutputPath>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;NETFX_CORE</DefineConstants>
+    <PlatformTarget>ARM</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="5.2.9" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Windows">
+      <HintPath>$(TargetPlatformSdkPath)UnionMetadata\$(TargetPlatformVersion)\Windows.winmd</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App.xaml.cs" />
+    <Compile Include="MainPage.xaml.cs" />
+    <Compile Include="Models\ChannelDetails.cs" />
+    <Compile Include="Models\DataPage.cs" />
+    <Compile Include="Models\PivotHeader.cs" />
+    <Compile Include="Models\VideoDetails.cs" />
+    <Compile Include="Models\VideoCategory.cs" />
+    <Compile Include="Models\VideoSummary.cs" />
+    <Compile Include="Services\OAuthPkceService.cs" />
+    <Compile Include="Services\RuntimeConfiguration.cs" />
+    <Compile Include="Services\SecureCredentialStore.cs" />
+    <Compile Include="Services\TrendingTileService.cs" />
+    <Compile Include="Services\YouTubeDataApiClient.cs" />
+    <Compile Include="Views\ChannelDetailsPage.xaml.cs" />
+    <Compile Include="Views\SettingsPage.xaml.cs" />
+    <Compile Include="Views\VideoDetailsPage.xaml.cs" />
+    <Compile Include="Views\VideoPlayerPage.xaml.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Page Include="MainPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ChannelDetailsPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SettingsPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\VideoDetailsPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\VideoPlayerPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\StoreLogo.png" />
+    <Content Include="Assets\Square150x150Logo.png" />
+    <Content Include="Assets\Square44x44Logo.png" />
+    <Content Include="Assets\Wide310x150Logo.png" />
+    <Content Include="Assets\SplashScreen.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+</Project>

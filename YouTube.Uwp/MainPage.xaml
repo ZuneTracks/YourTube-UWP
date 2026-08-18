@@ -1,0 +1,160 @@
+<Page
+    x:Class="YouTube.Uwp.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:YouTube.Uwp.Models">
+    <Page.Resources>
+        <DataTemplate x:Key="VideoCardTemplate">
+            <Border Background="{StaticResource PhoneCardBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="148" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Image Source="{Binding ThumbnailUrl}" Stretch="UniformToFill" />
+                        <Border VerticalAlignment="Bottom" Background="#C0000000" Padding="10,7,10,7">
+                            <TextBlock Text="{Binding Title}" Style="{StaticResource PhoneCardTitleStyle}" TextWrapping="Wrap" MaxLines="2" />
+                        </Border>
+                    </Grid>
+                    <StackPanel Grid.Row="1" Margin="10,8,10,10">
+                        <TextBlock Text="{Binding ChannelTitle}" Foreground="{StaticResource PhoneHighlightBrush}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding PublishedAt}" Style="{StaticResource PhoneMetadataStyle}" Margin="0,3,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="PhonePivotHeaderTemplate">
+            <Grid Width="{Binding Width}" Height="42">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="3" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="{Binding Label}" Style="{StaticResource PhonePivotHeaderTextStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" />
+                <Border Grid.Row="1" Background="{StaticResource PhoneAccentBrush}" Visibility="{Binding UnderlineVisibility}" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="InlineCategoryVideoTemplate">
+            <Button Background="Transparent" BorderThickness="0" Padding="0" Margin="0,0,0,10" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="CategoryVideoButton_Click" Tag="{Binding}">
+                <ContentControl Content="{Binding}" ContentTemplate="{StaticResource VideoCardTemplate}" />
+            </Button>
+        </DataTemplate>
+        <DataTemplate x:Key="CategoryTemplate">
+            <Border Background="{StaticResource PhoneCardBrush}" Margin="0,0,0,8">
+                <StackPanel>
+                    <Button Background="Transparent" BorderThickness="0" Padding="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="CategoryToggleButton_Click" Tag="{Binding}">
+                        <Grid Height="52" Margin="12,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding Title}" Style="{StaticResource PhoneCardTitleStyle}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding ToggleGlyph}" FontSize="28" Foreground="{StaticResource PhoneAccentBrush}" VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+                    <StackPanel Visibility="{Binding ExpandedContentVisibility}" Margin="12,0,12,12">
+                        <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,8" TextWrapping="Wrap" />
+                        <ItemsControl ItemsSource="{Binding Videos}" ItemTemplate="{StaticResource InlineCategoryVideoTemplate}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Background="{StaticResource PhonePageBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="64" />
+            <RowDefinition Height="4" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource PhoneHeaderBrush}">
+            <Grid Margin="16,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="48" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Image Source="ms-appx:///Assets/Square44x44Logo.png" Width="38" Height="38" VerticalAlignment="Center" Stretch="Uniform" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="YOURTUBE" FontFamily="Segoe UI Semibold" FontSize="20" Foreground="{StaticResource PhonePrimaryTextBrush}" />
+                    <TextBlock Text="PUBLIC BROWSER" FontSize="10" Foreground="{StaticResource PhoneMutedTextBrush}" Margin="1,-3,0,0" />
+                </StackPanel>
+                <Button Grid.Column="2" Content="SETTINGS" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowSettingsButton_Click" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+        <Border Grid.Row="1" Background="{StaticResource PhoneAccentBrush}" />
+
+        <Pivot x:Name="MainPivot" Grid.Row="2" HeaderTemplate="{StaticResource PhonePivotHeaderTemplate}" Foreground="{StaticResource PhonePrimaryTextBrush}" SelectionChanged="MainPivot_SelectionChanged">
+            <PivotItem>
+                <PivotItem.Header>
+                    <models:PivotHeader x:Name="HomePivotHeader" Label="HOME" Width="70" IsSelected="True" />
+                </PivotItem.Header>
+                <ScrollViewer>
+                    <StackPanel Margin="16,18,16,28">
+                        <TextBlock Text="discover" Style="{StaticResource PhonePageTitleStyle}" />
+                        <TextBlock Text="The latest popular videos, in the classic phone-first layout." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,16" />
+
+                        <Button Style="{StaticResource PhoneActionButtonStyle}" Click="PopularButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="0,0,0,12">
+                            <Grid Height="64">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="TRENDING NOW" FontSize="18" FontFamily="Segoe UI Semilight" />
+                                    <TextBlock Text="Load popular videos for your region" FontSize="12" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="›" FontSize="36" VerticalAlignment="Center" Margin="12,0,4,0" />
+                            </Grid>
+                        </Button>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <Button Content="SEARCH" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowSearchButton_Click" />
+                            <Button Content="CONFIGURE KEY" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowSettingsButton_Click" />
+                        </StackPanel>
+
+                        <TextBlock Text="popular videos" Style="{StaticResource PhoneSectionTitleStyle}" />
+                        <TextBlock x:Name="HomeStatusText" Style="{StaticResource PhoneMetadataStyle}" Text="Choose Trending Now to load public results." Margin="0,3,0,12" TextWrapping="Wrap" />
+                        <ListView ItemsSource="{Binding Results}" ItemTemplate="{StaticResource VideoCardTemplate}" ItemContainerStyle="{StaticResource PhoneListItemStyle}" IsItemClickEnabled="True" ItemClick="ResultsList_ItemClick" SelectionMode="None" />
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+
+            <PivotItem>
+                <PivotItem.Header>
+                    <models:PivotHeader x:Name="SearchPivotHeader" Label="SEARCH" Width="80" />
+                </PivotItem.Header>
+                <ScrollViewer>
+                    <StackPanel Margin="16,18,16,28">
+                        <TextBlock Text="search" Style="{StaticResource PhonePageTitleStyle}" />
+                        <TextBlock Text="Find public YouTube videos with your user-supplied API key." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,16" />
+                        <TextBox x:Name="SearchBox" Style="{StaticResource PhoneTextBoxStyle}" Header="Search terms" PlaceholderText="Search YouTube" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button Content="SEARCH" Style="{StaticResource PhoneActionButtonStyle}" Click="SearchButton_Click" />
+                            <Button Content="POPULAR" Style="{StaticResource PhoneOutlineButtonStyle}" Click="PopularButton_Click" />
+                        </StackPanel>
+                        <TextBlock Text="REGION" Style="{StaticResource PhoneMetadataStyle}" />
+                        <TextBox x:Name="RegionBox" Width="100" Style="{StaticResource PhoneTextBoxStyle}" Text="US" />
+                        <TextBlock x:Name="PublicStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,12" TextWrapping="Wrap" />
+                        <ListView ItemsSource="{Binding Results}" ItemTemplate="{StaticResource VideoCardTemplate}" ItemContainerStyle="{StaticResource PhoneListItemStyle}" IsItemClickEnabled="True" ItemClick="ResultsList_ItemClick" SelectionMode="None" />
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+
+            <PivotItem>
+                <PivotItem.Header>
+                    <models:PivotHeader x:Name="CategoriesPivotHeader" Label="CATEGORIES" Width="105" />
+                </PivotItem.Header>
+                <ScrollViewer>
+                    <StackPanel Margin="16,18,16,28">
+                        <TextBlock Text="categories" Style="{StaticResource PhonePageTitleStyle}" />
+                        <TextBlock Text="Tap a category to expand its current popular videos. Tap it again to collapse and choose another." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,16" TextWrapping="Wrap" />
+                        <TextBlock x:Name="CategoryStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,0,0,12" TextWrapping="Wrap" />
+                        <ItemsControl ItemsSource="{Binding Categories}" ItemTemplate="{StaticResource CategoryTemplate}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+        </Pivot>
+    </Grid>
+</Page>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         IgnorableNamespaces="uap mp">
+  <Identity Name="YourTube" Publisher="CN=YourTubeDevelopment" Version="1.0.7.4" />
+  <mp:PhoneIdentity PhoneProductId="9C3F44D1-BB5D-4F42-A477-415D167EF8A1" PhonePublisherId="D0D67887-805A-4B7B-9DB8-5A3E28E6D0D6" />
+  <Properties>
+    <DisplayName>YourTube</DisplayName>
+    <PublisherDisplayName>YourTube Development</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Mobile" MinVersion="10.0.15063.0" MaxVersionTested="10.0.15063.0" />
+  </Dependencies>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="YouTube.Uwp.App">
+      <uap:VisualElements DisplayName="YourTube"
+                          Description="A read-only YouTube Data API v3 client"
+                          BackgroundColor="transparent"
+                          Square150x150Logo="Assets\Square150x150Logo.png"
+                          Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+      </uap:VisualElements>
+      <Extensions>
+        <!-- Change this value and OAuthPkceService.PackagedRedirectProtocol together before shipping. -->
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="yourtube" />
+        </uap:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClient" />
+  </Capabilities>
+</Package>
