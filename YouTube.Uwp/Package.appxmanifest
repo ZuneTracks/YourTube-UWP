@@ -3,7 +3,7 @@
          xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
          xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
          IgnorableNamespaces="uap mp">
-  <Identity Name="YourTube" Publisher="CN=YourTubeDevelopment" Version="1.0.8.0" />
+  <Identity Name="YourTube" Publisher="CN=YourTubeDevelopment" Version="1.0.8.4" />
   <mp:PhoneIdentity PhoneProductId="9C3F44D1-BB5D-4F42-A477-415D167EF8A1" PhonePublisherId="D0D67887-805A-4B7B-9DB8-5A3E28E6D0D6" />
   <Properties>
     <DisplayName>YourTube</DisplayName>

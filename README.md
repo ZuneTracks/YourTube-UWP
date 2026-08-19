@@ -8,14 +8,14 @@ handling, or binary libraries are reused.
 
 ## Latest release
 
-[`v1.0.8.0`](https://github.com/ZuneTracks/YourTube-UWP/releases/tag/v1.0.8.0)
+[`v1.0.8.4`](https://github.com/ZuneTracks/YourTube-UWP/releases/tag/v1.0.8.4)
 is the latest public YourTube UWP release. It includes an ARM Windows 10 Mobile
 Developer Mode sideload package for devices running 10.0.15063.0 or later. The
 release assets include the AppX, its public development certificate, the two
 required ARM framework packages, and installation instructions.
 
-This release adds rotation between the last video selected for playback, the latest
-Trending Now result, and a branded YourTube live-tile frame. See
+This release fixes the pinned live-tile refresh regression so the Start tile updates
+with the latest video metadata after playback and returns to the home screen. See
 [CHANGELOG.md](CHANGELOG.md) for the complete release history.
 
 This is not a Microsoft Store or production-signed distribution: the package uses

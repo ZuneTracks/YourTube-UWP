@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.8.4 - Live tile refresh fix
+
+- Fixed the live-tile regression where a previously pinned app tile would not
+  reflect the most recently played video after returning to the Start screen.
+- Kept the rotating live-tile behavior but added unique tile update tags so the
+  last-played and trending metadata refresh cleanly without being stuck on stale
+  content.
+- Preserved the fallback sequence: last played, then Trending Now, then the
+  branded YourTube tile.
+- Updated the ARM Windows 10 Mobile AppX package version to `1.0.8.4`.
+
 ## v1.0.8.0 - Rotating live tile release
 
 - Added a foreground live-tile queue that rotates the last video selected for

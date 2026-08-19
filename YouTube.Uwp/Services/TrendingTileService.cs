@@ -10,6 +10,10 @@ namespace YouTube.Uwp.Services
     // Keeps the rotating live-tile queue separate from the page and API flows.
     public sealed class TrendingTileService
     {
+        private const string LastPlayedTag = "YourTube.LiveTile.LastPlayed";
+        private const string TrendingTag = "YourTube.LiveTile.Trending";
+        private const string BrandTag = "YourTube.LiveTile.Brand";
+
         public void Update(VideoSummary video, string regionCode)
         {
             if (video == null)
@@ -41,26 +45,29 @@ namespace YouTube.Uwp.Services
             VideoSummary lastPlayed = LiveTileStateStore.GetLastPlayed();
             if (lastPlayed != null)
             {
-                AddNotification(updater, CreateVideoTileXml(lastPlayed, "Last played"));
+                AddNotification(updater, CreateVideoTileXml(lastPlayed, "Last played"), LastPlayedTag);
             }
 
             VideoSummary trending = LiveTileStateStore.GetTrending();
             if (trending != null)
             {
-                AddNotification(updater, CreateVideoTileXml(trending, CreateTrendingHeading(LiveTileStateStore.GetTrendingRegion())));
+                AddNotification(updater, CreateVideoTileXml(trending, CreateTrendingHeading(LiveTileStateStore.GetTrendingRegion())), TrendingTag);
             }
 
             if (lastPlayed != null || trending != null)
             {
-                AddNotification(updater, CreateBrandTileXml());
+                AddNotification(updater, CreateBrandTileXml(), BrandTag);
             }
         }
 
-        private static void AddNotification(TileUpdater updater, string xml)
+        private static void AddNotification(TileUpdater updater, string xml, string tag)
         {
             XmlDocument tileXml = new XmlDocument();
             tileXml.LoadXml(xml);
-            updater.Update(new TileNotification(tileXml));
+
+            TileNotification notification = new TileNotification(tileXml);
+            notification.Tag = tag;
+            updater.Update(notification);
         }
 
         private static string CreateVideoTileXml(VideoSummary video, string heading)
