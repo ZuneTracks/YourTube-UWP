@@ -137,6 +137,11 @@ namespace YouTube.Uwp
             Frame.Navigate(typeof(SettingsPage));
         }
 
+        private void ShowUploadButton_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(UploadVideoPage));
+        }
+
         private async void MainPivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdatePivotHeaders();

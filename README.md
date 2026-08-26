@@ -70,15 +70,18 @@ styling.
    viable quota and application restrictions. Enter it at runtime in the app. It is
    stored in Windows Credential Locker, is sent only as the `key` parameter on
    public read-only v3 requests, and is never used for account authorization.
-3. Create an OAuth client appropriate for a public installed application. Do not
-   create or ship a client secret. Configure the client ID at runtime in the app.
-4. Choose a unique redirect URI scheme. Replace `yourtube` in both
+3. Create an **iOS** OAuth client for this UWP custom-scheme flow, using
+   `com.zunetracks.yourtube` as its Bundle ID. Do not create or ship a client
+   secret. Configure the generated client ID at runtime in the app.
+4. Register the package's exact redirect URI,
+   `com.zunetracks.yourtube:/oauth2redirect`, for the
+   OAuth client, then enter that same URI in the app's **Redirect URI** field. UWP
+   protocol registrations are fixed in the package, so the runtime setting rejects
+   mismatches rather than launching a callback the app cannot receive. To ship a
+   different scheme, change both the `com.zunetracks.yourtube` protocol in
    `YouTube.Uwp\Package.appxmanifest` and
-   `OAuthPkceService.PackagedRedirectProtocol`, then enter the identical scheme in
-   the app's **Redirect protocol** field. UWP protocol registrations are fixed in
-   the package, so the runtime setting rejects mismatches rather than launching a
-   callback the app cannot receive. The resulting redirect URI is
-   `your-scheme:/oauth2redirect`; register that exact URI only when the selected
+   `OAuthPkceService.PackagedRedirectProtocol`, then rebuild the package. Register
+   the resulting `your-scheme:/oauth2redirect` URI only when the selected
    Google OAuth client type and current Google policy support it. Google controls
    acceptable client-type/redirect combinations; do not work around a rejected
    redirect with an embedded secret or an in-app web view.
@@ -128,7 +131,8 @@ API key or on the retired WP8 scheduled agent.
 
 ## Account authorization architecture
 
-`OAuthPkceService` uses Google OAuth 2.0 authorization code flow with PKCE:
+`OAuthPkceService` uses Google OAuth 2.0 authorization code flow with PKCE and the
+`https://www.googleapis.com/auth/youtube.upload` scope:
 
 1. It creates a cryptographically random `state` and code verifier, hashes the
    verifier using SHA-256 for `code_challenge=S256`, and stores the short-lived
@@ -141,10 +145,23 @@ API key or on the retired WP8 scheduled agent.
 4. Access and refresh tokens are kept in Credential Locker. `GetValidAccessTokenAsync`
    refreshes an expiring access token without adding an API key.
 
-The current UI requests only `https://www.googleapis.com/auth/youtube.readonly` and
-does not make authenticated data calls. This is intentional: an API key cannot
-support any account action. Future account features must explicitly request the
-minimum OAuth scope and use a bearer access token. Examples include:
+The **Upload** page uses a brokered UWP file picker, sends `snippet` and `status`
+metadata to `videos.insert`, and uploads the selected file in 256 KiB resumable
+chunks. It reports determinate byte progress and permits cancellation between
+chunks. The uploader requires completed OAuth authorization and never uses the
+public API key. Other account features must explicitly request the minimum OAuth
+scope and use a bearer access token. Examples include:
+
+### Uploading a test video
+
+1. In **Settings**, save a user-created OAuth client ID and the exact
+   `com.zunetracks.yourtube:/oauth2redirect` URI, then use **Sign in** and
+   complete authorization in the system browser.
+2. Open **Upload**, select a local `.mp4`, `.wmv`, `.mov`, `.avi`, or `.mkv` file,
+   enter a title, optional description, and privacy level, then select **Start
+   upload**.
+3. Select **Cancel** to stop the foreground transfer. A canceled session is not
+   persisted or resumed after leaving the page.
 
 | Feature | v3 resource | OAuth required |
 | --- | --- | --- |

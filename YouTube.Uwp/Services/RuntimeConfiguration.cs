@@ -8,16 +8,16 @@ namespace YouTube.Uwp.Services
         private const string ApiKeyResource = "YourTube.ApiKey";
         private const string ApiKeyUserName = "PublicReadOnly";
         private const string OAuthClientIdKey = "OAuthClientId";
-        private const string RedirectProtocolKey = "RedirectProtocol";
+        private const string OAuthRedirectUriKey = "OAuthRedirectUri";
 
         public string OAuthClientId
         {
             get { return ReadSetting(OAuthClientIdKey); }
         }
 
-        public string RedirectProtocol
+        public string OAuthRedirectUri
         {
-            get { return ReadSetting(RedirectProtocolKey) ?? OAuthPkceService.PackagedRedirectProtocol; }
+            get { return ReadSetting(OAuthRedirectUriKey) ?? OAuthPkceService.PackagedRedirectUri; }
         }
 
         public bool HasApiKey
@@ -45,27 +45,23 @@ namespace YouTube.Uwp.Services
             SecureCredentialStore.Delete(ApiKeyResource, ApiKeyUserName);
         }
 
-        public void SaveOAuthSettings(string clientId, string redirectProtocol)
+        public void SaveOAuthSettings(string clientId, string redirectUri)
         {
             if (string.IsNullOrWhiteSpace(clientId))
             {
                 throw new ArgumentException("An OAuth client ID is required.", "clientId");
             }
 
-            if (!OAuthPkceService.IsValidProtocolScheme(redirectProtocol))
-            {
-                throw new ArgumentException("The redirect protocol must be a valid URI scheme.", "redirectProtocol");
-            }
-
-            if (!string.Equals(redirectProtocol.Trim(), OAuthPkceService.PackagedRedirectProtocol, StringComparison.OrdinalIgnoreCase))
+            if (!OAuthPkceService.IsPackagedRedirectUri(redirectUri))
             {
                 throw new ArgumentException(
-                    "The redirect protocol must match the protocol declared in Package.appxmanifest. Change both package and source before shipping.",
-                    "redirectProtocol");
+                    "The redirect URI must exactly match the protocol handler declared in Package.appxmanifest: "
+                    + OAuthPkceService.PackagedRedirectUri + ".",
+                    "redirectUri");
             }
 
             SaveSetting(OAuthClientIdKey, clientId.Trim());
-            SaveSetting(RedirectProtocolKey, redirectProtocol.Trim().ToLowerInvariant());
+            SaveSetting(OAuthRedirectUriKey, OAuthPkceService.PackagedRedirectUri);
         }
 
         private static string ReadSetting(string key)

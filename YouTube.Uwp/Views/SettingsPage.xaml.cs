@@ -18,7 +18,7 @@ namespace YouTube.Uwp.Views
             oauthService = new OAuthPkceService(App.Configuration);
             ApiKeyStatusText.Text = App.Configuration.HasApiKey ? "Your API key is now stored in Windows Credential Locker." : "No API key is configured.";
             OAuthClientIdBox.Text = App.Configuration.OAuthClientId ?? string.Empty;
-            RedirectProtocolBox.Text = App.Configuration.RedirectProtocol ?? string.Empty;
+            RedirectUriBox.Text = App.Configuration.OAuthRedirectUri ?? string.Empty;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -66,8 +66,8 @@ namespace YouTube.Uwp.Views
         {
             try
             {
-                App.Configuration.SaveOAuthSettings(OAuthClientIdBox.Text, RedirectProtocolBox.Text);
-                AuthStatusText.Text = "OAuth settings saved. The redirect protocol must also be declared in Package.appxmanifest.";
+                App.Configuration.SaveOAuthSettings(OAuthClientIdBox.Text, RedirectUriBox.Text);
+                AuthStatusText.Text = "OAuth settings saved. Sign in grants permission to upload videos.";
             }
             catch (ArgumentException exception)
             {

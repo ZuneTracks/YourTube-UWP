@@ -101,8 +101,10 @@
     <Compile Include="Services\SecureCredentialStore.cs" />
     <Compile Include="Services\TrendingTileService.cs" />
     <Compile Include="Services\YouTubeDataApiClient.cs" />
+    <Compile Include="Services\YouTubeResumableUploadClient.cs" />
     <Compile Include="Views\ChannelDetailsPage.xaml.cs" />
     <Compile Include="Views\SettingsPage.xaml.cs" />
+    <Compile Include="Views\UploadVideoPage.xaml.cs" />
     <Compile Include="Views\VideoDetailsPage.xaml.cs" />
     <Compile Include="Views\VideoPlayerPage.xaml.cs" />
   </ItemGroup>
@@ -117,6 +119,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\SettingsPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\UploadVideoPage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\VideoDetailsPage.xaml">

@@ -48,6 +48,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="{Binding Title}" Style="{StaticResource PhoneCardTitleStyle}" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="1" Text="{Binding ToggleGlyph}" FontSize="28" Foreground="{StaticResource PhoneAccentBrush}" VerticalAlignment="Center" />
@@ -112,7 +113,7 @@
 
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                             <Button Content="SEARCH" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowSearchButton_Click" />
-                            <Button Content="CONFIGURE KEY" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowSettingsButton_Click" />
+                            <Button Content="UPLOAD VIDEO" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowUploadButton_Click" />
                         </StackPanel>
 
                         <TextBlock Text="popular videos" Style="{StaticResource PhoneSectionTitleStyle}" />

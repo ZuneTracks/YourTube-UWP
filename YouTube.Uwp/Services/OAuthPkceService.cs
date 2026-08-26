@@ -14,7 +14,9 @@ namespace YouTube.Uwp.Services
     public sealed class OAuthPkceService
     {
         // The UWP protocol handler is declared at package build time and cannot be changed at runtime.
-        public const string PackagedRedirectProtocol = "yourtube";
+        public const string PackagedRedirectProtocol = "com.zunetracks.yourtube";
+        public const string PackagedRedirectUri = PackagedRedirectProtocol + ":/oauth2redirect";
+        public const string YouTubeUploadScope = "https://www.googleapis.com/auth/youtube.upload";
         private const string AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
         private const string TokenEndpoint = "https://oauth2.googleapis.com/token";
         private const string PendingAuthorizationResource = "YourTube.PendingAuthorization";
@@ -46,7 +48,7 @@ namespace YouTube.Uwp.Services
             parameters.Add("client_id", settings.ClientId);
             parameters.Add("redirect_uri", settings.RedirectUri);
             parameters.Add("response_type", "code");
-            parameters.Add("scope", "https://www.googleapis.com/auth/youtube.readonly");
+            parameters.Add("scope", YouTubeUploadScope);
             parameters.Add("code_challenge", challenge);
             parameters.Add("code_challenge_method", "S256");
             parameters.Add("state", state);
@@ -137,23 +139,10 @@ namespace YouTube.Uwp.Services
             return refreshed.AccessToken;
         }
 
-        public static bool IsValidProtocolScheme(string scheme)
+        public static bool IsPackagedRedirectUri(string redirectUri)
         {
-            if (string.IsNullOrWhiteSpace(scheme) || !char.IsLetter(scheme[0]))
-            {
-                return false;
-            }
-
-            for (int index = 1; index < scheme.Length; index++)
-            {
-                char character = scheme[index];
-                if (!char.IsLetterOrDigit(character) && character != '+' && character != '-' && character != '.')
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return !string.IsNullOrWhiteSpace(redirectUri)
+                && string.Equals(redirectUri.Trim(), PackagedRedirectUri, StringComparison.OrdinalIgnoreCase);
         }
 
         private async Task<OAuthToken> RequestTokenAsync(IReadOnlyDictionary<string, string> parameters)
@@ -187,12 +176,12 @@ namespace YouTube.Uwp.Services
                 throw new OAuthException("Set an OAuth client ID before signing in.");
             }
 
-            if (!IsValidProtocolScheme(configuration.RedirectProtocol))
+            if (!IsPackagedRedirectUri(configuration.OAuthRedirectUri))
             {
-                throw new OAuthException("Set a valid redirect protocol before signing in.");
+                throw new OAuthException("Set the OAuth redirect URI to " + PackagedRedirectUri + " before signing in.");
             }
 
-            return new OAuthSettings(configuration.OAuthClientId, configuration.RedirectProtocol);
+            return new OAuthSettings(configuration.OAuthClientId, configuration.OAuthRedirectUri);
         }
 
         private OAuthToken ReadToken()
@@ -290,16 +279,13 @@ namespace YouTube.Uwp.Services
 
         private sealed class OAuthSettings
         {
-            public OAuthSettings(string clientId, string redirectProtocol)
+            public OAuthSettings(string clientId, string redirectUri)
             {
                 ClientId = clientId;
-                RedirectProtocol = redirectProtocol;
-                RedirectUri = redirectProtocol + ":/oauth2redirect";
+                RedirectUri = redirectUri;
             }
 
             public string ClientId { get; private set; }
-
-            public string RedirectProtocol { get; private set; }
 
             public string RedirectUri { get; private set; }
         }

@@ -20,7 +20,7 @@
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="YouTube.Uwp.App">
       <uap:VisualElements DisplayName="YourTube Browser"
-                          Description="A UWP browser for YouTube. A YouTube v3 API key is required to use this app."
+                          Description="A UWP browser and upload prototype for YouTube."
                           BackgroundColor="transparent"
                           Square150x150Logo="Assets\Square150x150Logo.png"
                           Square44x44Logo="Assets\Square44x44Logo.png">
@@ -30,7 +30,7 @@
       <Extensions>
         <!-- Change this value and OAuthPkceService.PackagedRedirectProtocol together before shipping. -->
         <uap:Extension Category="windows.protocol">
-          <uap:Protocol Name="yourtube" />
+          <uap:Protocol Name="com.zunetracks.yourtube" />
         </uap:Extension>
       </Extensions>
     </Application>

@@ -44,7 +44,7 @@ namespace YouTube.Uwp
             try
             {
                 await oauthService.CompleteAuthorizationAsync(protocolArgs.Uri);
-                OnAuthorizationCompleted("Google authorization completed. Account endpoints are not enabled by this read-only client.");
+                OnAuthorizationCompleted("Google authorization completed. You can now upload a selected video.");
             }
             catch (OAuthException exception)
             {

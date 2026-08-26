@@ -40,9 +40,10 @@
                 <Border Background="{StaticResource PhoneSurfaceBrush}" Padding="14">
                     <StackPanel>
                         <TextBlock Text="google account" Style="{StaticResource PhoneSectionTitleStyle}" />
-                        <TextBlock Text="OAuth is separate from API-key calls. This read-only build does not expose account mutations." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
+                        <TextBlock Text="Upload uses your OAuth client ID, the system browser, and PKCE. No client secret is used or stored." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
                         <TextBox x:Name="OAuthClientIdBox" Style="{StaticResource PhoneTextBoxStyle}" Header="OAuth client ID" PlaceholderText="Paste your Google OAuth client ID" />
-                        <TextBox x:Name="RedirectProtocolBox" Style="{StaticResource PhoneTextBoxStyle}" Header="Redirect protocol" PlaceholderText="Must match Package.appxmanifest protocol" />
+                        <TextBox x:Name="RedirectUriBox" Style="{StaticResource PhoneTextBoxStyle}" Header="Redirect URI" PlaceholderText="com.zunetracks.yourtube:/oauth2redirect" />
+                        <TextBlock Text="Register this exact redirect URI for your Google OAuth client. It must match this package's protocol handler." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,8" TextWrapping="Wrap" />
                         <StackPanel Orientation="Horizontal">
                             <Button Content="SAVE OAUTH" Style="{StaticResource PhoneActionButtonStyle}" Click="SaveOAuthSettingsButton_Click" />
                             <Button Content="SIGN IN" Style="{StaticResource PhoneOutlineButtonStyle}" Click="SignInButton_Click" />
