@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.0.9.0 - Store packaging preparation and navigation fix
+
+- Added an explicit ARM Store-upload configuration that creates an unsigned
+  `.appxupload` candidate with public symbols.
+- Added a build-time guard requiring Visual Studio Store association metadata
+  before Store packaging.
+- Updated the package version to use a Store-compatible fourth version field of
+  `0`.
+- Preserved the Search pivot and its prior results when navigating Search ->
+  video -> Back by caching `MainPage`; Home and Categories video navigation
+  behavior is unchanged.
+
 ## v1.0.8.4 - Live tile refresh fix
 
 - Fixed the live-tile regression where a previously pinned app tile would not
