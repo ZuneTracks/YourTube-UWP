@@ -163,7 +163,7 @@ scope and use a bearer access token. Examples include:
 ### Uploading a test video
 
 1. In **Settings**, save a user-created **TVs and limited-input devices** OAuth
-   client ID and client secret, use **Sign in**, and enter the displayed Google
+   client ID and client secret, use **Start Google sign-in**, and enter the displayed Google
    code at the displayed verification URL from another phone, tablet, or computer
    with a current browser.
    The Windows 10 Mobile browser is not used for this step.
@@ -172,6 +172,9 @@ scope and use a bearer access token. Examples include:
    upload**.
 3. Select **Cancel** to stop the foreground transfer. A canceled session is not
    persisted or resumed after leaving the page.
+
+Use **Settings > Sign out** to remove the stored Google access and refresh-token
+metadata before authorizing another account.
 
 ### Diagnosing sign-in failures
 

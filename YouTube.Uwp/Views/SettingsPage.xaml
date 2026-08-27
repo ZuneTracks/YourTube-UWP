@@ -44,12 +44,21 @@
                         <TextBlock Text="Upload uses a Google TVs and limited-input device OAuth client. No redirect URI is used. Saving credentials here overrides optional local Visual Studio build defaults." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
                         <TextBox x:Name="OAuthClientIdBox" Style="{StaticResource PhoneTextBoxStyle}" Header="Limited-input device OAuth client ID" PlaceholderText="Paste your Google OAuth client ID" />
                         <PasswordBox x:Name="OAuthClientSecretBox" Style="{StaticResource PhonePasswordBoxStyle}" Header="Limited-input device OAuth client secret" PlaceholderText="Paste your Google OAuth client secret" />
-                        <TextBlock Text="In Google Auth Platform, create a TVs and limited-input devices client. The code below is entered on another device; it never opens a sign-in form in this app." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,8" TextWrapping="Wrap" />
-                        <StackPanel Orientation="Horizontal">
-                            <Button Content="SAVE CLIENT ID" Style="{StaticResource PhoneActionButtonStyle}" Click="SaveOAuthSettingsButton_Click" />
-                            <Button Content="SIGN IN" Style="{StaticResource PhoneOutlineButtonStyle}" Click="SignInButton_Click" />
-                            <Button x:Name="CancelAuthorizationButton" Content="CANCEL" Style="{StaticResource PhoneOutlineButtonStyle}" Click="CancelAuthorizationButton_Click" IsEnabled="False" />
-                        </StackPanel>
+                        <TextBlock Text="Save credentials, then start Google sign-in. The verification code below is entered on another device; this app never opens a sign-in form." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,8" TextWrapping="Wrap" />
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="SAVE CREDENTIALS" Style="{StaticResource PhoneActionButtonStyle}" Click="SaveOAuthSettingsButton_Click" />
+                                <Button x:Name="SignInButton" Content="START GOOGLE SIGN-IN" Style="{StaticResource PhoneOutlineButtonStyle}" Click="SignInButton_Click" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <Button x:Name="CancelAuthorizationButton" Content="CANCEL" Style="{StaticResource PhoneOutlineButtonStyle}" Click="CancelAuthorizationButton_Click" IsEnabled="False" />
+                                <Button x:Name="SignOutButton" Content="SIGN OUT" Style="{StaticResource PhoneOutlineButtonStyle}" Click="SignOutButton_Click" />
+                            </StackPanel>
+                        </Grid>
                         <TextBlock x:Name="VerificationUrlText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,8,0,0" TextWrapping="Wrap" />
                         <TextBlock x:Name="VerificationCodeText" FontSize="24" FontFamily="Segoe UI Semibold" Foreground="{StaticResource PhoneHighlightBrush}" Margin="0,2,0,0" TextWrapping="Wrap" />
                         <TextBlock x:Name="AuthStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,8,0,0" TextWrapping="Wrap" />

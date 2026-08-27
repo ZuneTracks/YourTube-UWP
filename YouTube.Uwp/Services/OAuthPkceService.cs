@@ -251,6 +251,12 @@ namespace YouTube.Uwp.Services
             SecureCredentialStore.Delete(TokenExpiryResource, CredentialUserName);
         }
 
+        public static bool HasStoredToken()
+        {
+            return !string.IsNullOrWhiteSpace(SecureCredentialStore.Read(TokenAccessResource, CredentialUserName))
+                && !string.IsNullOrWhiteSpace(SecureCredentialStore.Read(TokenExpiryResource, CredentialUserName));
+        }
+
         private OAuthToken ReadToken()
         {
             string accessToken = SecureCredentialStore.Read(TokenAccessResource, CredentialUserName);

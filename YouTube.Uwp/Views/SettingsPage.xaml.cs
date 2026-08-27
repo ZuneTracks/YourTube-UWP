@@ -22,10 +22,12 @@ namespace YouTube.Uwp.Views
             oauthService = new OAuthDeviceAuthorizationService(App.Configuration);
             ApiKeyStatusText.Text = GetApiKeyStatus();
             OAuthClientIdBox.Text = App.Configuration.OAuthClientId ?? string.Empty;
+            UpdateAuthorizationStatus();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            UpdateAuthorizationStatus();
             base.OnNavigatedTo(e);
         }
 
@@ -84,6 +86,31 @@ namespace YouTube.Uwp.Views
             return "No API key is configured.";
         }
 
+        private void UpdateAuthorizationStatus()
+        {
+            if (OAuthDeviceAuthorizationService.HasStoredToken())
+            {
+                AuthStatusText.Text = "A Google account is authorized for video uploads.";
+            }
+            else if (App.Configuration.HasOAuthDeviceCredentials)
+            {
+                AuthStatusText.Text = "OAuth credentials are configured. Start Google sign-in before uploading.";
+            }
+            else
+            {
+                AuthStatusText.Text = "Save OAuth credentials, then start Google sign-in before uploading.";
+            }
+
+            UpdateAuthorizationControls();
+        }
+
+        private void UpdateAuthorizationControls()
+        {
+            bool authorizing = authorizationCancellation != null;
+            SignInButton.IsEnabled = !authorizing;
+            SignOutButton.IsEnabled = !authorizing && OAuthDeviceAuthorizationService.HasStoredToken();
+        }
+
         private void SaveOAuthSettingsButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -91,6 +118,7 @@ namespace YouTube.Uwp.Views
                 App.Configuration.SaveOAuthDeviceSettings(OAuthClientIdBox.Text, OAuthClientSecretBox.Password);
                 OAuthClientSecretBox.Password = string.Empty;
                 AuthStatusText.Text = "Limited-input device OAuth credentials saved. If either value changed, sign in again before uploading.";
+                UpdateAuthorizationControls();
             }
             catch (ArgumentException exception)
             {
@@ -107,6 +135,8 @@ namespace YouTube.Uwp.Views
 
             authorizationCancellation = new CancellationTokenSource();
             CancelAuthorizationButton.IsEnabled = true;
+            SignInButton.IsEnabled = false;
+            SignOutButton.IsEnabled = false;
             VerificationUrlText.Text = string.Empty;
             VerificationCodeText.Text = string.Empty;
             DiagnosticLog.Write("OAuth.SignIn", "Device authorization requested.");
@@ -152,7 +182,17 @@ namespace YouTube.Uwp.Views
                 authorizationCancellation.Dispose();
                 authorizationCancellation = null;
                 CancelAuthorizationButton.IsEnabled = false;
+                UpdateAuthorizationControls();
             }
+        }
+
+        private void SignOutButton_Click(object sender, RoutedEventArgs e)
+        {
+            OAuthDeviceAuthorizationService.ClearStoredToken();
+            VerificationUrlText.Text = string.Empty;
+            VerificationCodeText.Text = string.Empty;
+            AuthStatusText.Text = "Google authorization removed. Start Google sign-in before uploading.";
+            UpdateAuthorizationControls();
         }
 
         private void AboutButton_Click(object sender, RoutedEventArgs e)

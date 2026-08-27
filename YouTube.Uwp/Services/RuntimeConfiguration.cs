@@ -21,6 +21,15 @@ namespace YouTube.Uwp.Services
             get { return !string.IsNullOrWhiteSpace(GetApiKey()); }
         }
 
+        public bool HasOAuthDeviceCredentials
+        {
+            get
+            {
+                return !string.IsNullOrWhiteSpace(OAuthClientId)
+                    && !string.IsNullOrWhiteSpace(GetOAuthClientSecret());
+            }
+        }
+
         public bool HasStoredApiKey
         {
             get { return !string.IsNullOrWhiteSpace(SecureCredentialStore.Read(ApiKeyResource, ApiKeyUserName)); }
