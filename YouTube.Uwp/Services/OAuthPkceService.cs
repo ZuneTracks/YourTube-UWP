@@ -41,9 +41,9 @@ namespace YouTube.Uwp.Services
 
         public async Task<DeviceAuthorizationInfo> BeginAuthorizationAsync(CancellationToken cancellationToken)
         {
-            string clientId = GetValidatedClientId();
+            OAuthDeviceCredentials credentials = GetValidatedCredentials();
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("client_id", clientId);
+            parameters.Add("client_id", credentials.ClientId);
             parameters.Add("scope", YouTubeUploadScope);
 
             using (HttpResponseMessage response = await httpClient.SendAsync(
@@ -94,7 +94,7 @@ namespace YouTube.Uwp.Services
                 throw new ArgumentNullException("authorization");
             }
 
-            string clientId = GetValidatedClientId();
+            OAuthDeviceCredentials credentials = GetValidatedCredentials();
             DateTimeOffset expiresAt = DateTimeOffset.UtcNow.AddSeconds(authorization.ExpiresInSeconds);
             int pollIntervalSeconds = Math.Max(5, authorization.PollIntervalSeconds);
             while (DateTimeOffset.UtcNow < expiresAt)
@@ -104,7 +104,8 @@ namespace YouTube.Uwp.Services
 
                 Dictionary<string, string> parameters = new Dictionary<string, string>();
                 parameters.Add("device_code", authorization.DeviceCode);
-                parameters.Add("client_id", clientId);
+                parameters.Add("client_id", credentials.ClientId);
+                parameters.Add("client_secret", credentials.ClientSecret);
                 parameters.Add("grant_type", "urn:ietf:params:oauth:grant-type:device_code");
 
                 DeviceTokenResponse response = await RequestDeviceTokenAsync(parameters, cancellationToken);
@@ -133,7 +134,7 @@ namespace YouTube.Uwp.Services
 
         public async Task<string> GetValidAccessTokenAsync()
         {
-            string clientId = GetValidatedClientId();
+            OAuthDeviceCredentials credentials = GetValidatedCredentials();
             OAuthToken token = ReadToken();
             if (token == null)
             {
@@ -151,7 +152,8 @@ namespace YouTube.Uwp.Services
             }
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("client_id", clientId);
+            parameters.Add("client_id", credentials.ClientId);
+            parameters.Add("client_secret", credentials.ClientSecret);
             parameters.Add("refresh_token", token.RefreshToken);
             parameters.Add("grant_type", "refresh_token");
             OAuthToken refreshed = await RequestTokenAsync(parameters, CancellationToken.None);
@@ -219,14 +221,20 @@ namespace YouTube.Uwp.Services
             };
         }
 
-        private string GetValidatedClientId()
+        private OAuthDeviceCredentials GetValidatedCredentials()
         {
             if (string.IsNullOrWhiteSpace(configuration.OAuthClientId))
             {
                 throw new OAuthException("Set a limited-input device OAuth client ID before signing in.");
             }
 
-            return configuration.OAuthClientId;
+            string clientSecret = configuration.GetOAuthClientSecret();
+            if (string.IsNullOrWhiteSpace(clientSecret))
+            {
+                throw new OAuthException("Set the limited-input device OAuth client secret before signing in.");
+            }
+
+            return new OAuthDeviceCredentials(configuration.OAuthClientId, clientSecret);
         }
 
         public static void ClearStoredToken()
@@ -302,6 +310,19 @@ namespace YouTube.Uwp.Services
             public OAuthToken Token { get; private set; }
 
             public string Error { get; private set; }
+        }
+
+        private sealed class OAuthDeviceCredentials
+        {
+            public OAuthDeviceCredentials(string clientId, string clientSecret)
+            {
+                ClientId = clientId;
+                ClientSecret = clientSecret;
+            }
+
+            public string ClientId { get; private set; }
+
+            public string ClientSecret { get; private set; }
         }
     }
 

@@ -68,8 +68,9 @@ namespace YouTube.Uwp.Views
         {
             try
             {
-                App.Configuration.SaveOAuthClientId(OAuthClientIdBox.Text);
-                AuthStatusText.Text = "Limited-input device OAuth client ID saved. If it changed, sign in again before uploading.";
+                App.Configuration.SaveOAuthDeviceSettings(OAuthClientIdBox.Text, OAuthClientSecretBox.Password);
+                OAuthClientSecretBox.Password = string.Empty;
+                AuthStatusText.Text = "Limited-input device OAuth credentials saved. If either value changed, sign in again before uploading.";
             }
             catch (ArgumentException exception)
             {

@@ -40,8 +40,9 @@
                 <Border Background="{StaticResource PhoneSurfaceBrush}" Padding="14">
                     <StackPanel>
                         <TextBlock Text="google account" Style="{StaticResource PhoneSectionTitleStyle}" />
-                        <TextBlock Text="Upload uses a Google TVs and limited-input device OAuth client. No redirect URI or client secret is used or stored." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
+                        <TextBlock Text="Upload uses a Google TVs and limited-input device OAuth client. No redirect URI is used. Your client secret is stored only in Windows Credential Locker." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
                         <TextBox x:Name="OAuthClientIdBox" Style="{StaticResource PhoneTextBoxStyle}" Header="Limited-input device OAuth client ID" PlaceholderText="Paste your Google OAuth client ID" />
+                        <PasswordBox x:Name="OAuthClientSecretBox" Style="{StaticResource PhonePasswordBoxStyle}" Header="Limited-input device OAuth client secret" PlaceholderText="Paste your Google OAuth client secret" />
                         <TextBlock Text="In Google Auth Platform, create a TVs and limited-input devices client. The code below is entered on another device; it never opens a sign-in form in this app." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,8" TextWrapping="Wrap" />
                         <StackPanel Orientation="Horizontal">
                             <Button Content="SAVE CLIENT ID" Style="{StaticResource PhoneActionButtonStyle}" Click="SaveOAuthSettingsButton_Click" />

@@ -8,6 +8,8 @@ namespace YouTube.Uwp.Services
         private const string ApiKeyResource = "YourTube.ApiKey";
         private const string ApiKeyUserName = "PublicReadOnly";
         private const string OAuthClientIdKey = "OAuthClientId";
+        private const string OAuthClientSecretResource = "YourTube.OAuthClientSecret";
+        private const string OAuthClientSecretUserName = "LimitedInputDevice";
 
         public string OAuthClientId
         {
@@ -39,20 +41,33 @@ namespace YouTube.Uwp.Services
             SecureCredentialStore.Delete(ApiKeyResource, ApiKeyUserName);
         }
 
-        public void SaveOAuthClientId(string clientId)
+        public string GetOAuthClientSecret()
+        {
+            return SecureCredentialStore.Read(OAuthClientSecretResource, OAuthClientSecretUserName);
+        }
+
+        public void SaveOAuthDeviceSettings(string clientId, string clientSecret)
         {
             if (string.IsNullOrWhiteSpace(clientId))
             {
                 throw new ArgumentException("A limited-input device OAuth client ID is required.", "clientId");
             }
 
+            if (string.IsNullOrWhiteSpace(clientSecret))
+            {
+                throw new ArgumentException("A limited-input device OAuth client secret is required.", "clientSecret");
+            }
+
             string normalizedClientId = clientId.Trim();
-            if (!string.Equals(OAuthClientId, normalizedClientId, StringComparison.Ordinal))
+            string normalizedClientSecret = clientSecret.Trim();
+            if (!string.Equals(OAuthClientId, normalizedClientId, StringComparison.Ordinal)
+                || !string.Equals(GetOAuthClientSecret(), normalizedClientSecret, StringComparison.Ordinal))
             {
                 OAuthDeviceAuthorizationService.ClearStoredToken();
             }
 
             SaveSetting(OAuthClientIdKey, normalizedClientId);
+            SecureCredentialStore.Write(OAuthClientSecretResource, OAuthClientSecretUserName, normalizedClientSecret);
         }
 
         private static string ReadSetting(string key)

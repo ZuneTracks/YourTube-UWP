@@ -70,9 +70,10 @@ styling.
    viable quota and application restrictions. Enter it at runtime in the app. It is
    stored in Windows Credential Locker, is sent only as the `key` parameter on
    public read-only v3 requests, and is never used for account authorization.
-3. Create a **TVs and limited-input devices** OAuth client. Do not create or ship a
-   client secret, and do not configure a redirect URI. Configure the generated
-   client ID at runtime in the app. Changing that client ID clears the existing
+3. Create a **TVs and limited-input devices** OAuth client. Do not configure a
+   redirect URI. Configure its generated client ID and client secret at runtime in
+   the app; the secret is stored only in Windows Credential Locker and is never
+   included in the package. Changing either value clears the existing
    authorization, so complete sign-in again.
 4. Ensure the OAuth consent screen, test users, scopes, and any verification
    requirements are completed in Google Cloud before production use.
@@ -127,8 +128,8 @@ the `https://www.googleapis.com/auth/youtube.upload` scope:
    user code. The user completes authorization in a browser on another device; the
    app does not embed a sign-in page or receive a redirect.
 2. It polls `https://oauth2.googleapis.com/token` at Google's requested interval
-   until authorization succeeds, expires, or is canceled. A client secret is
-   neither requested nor supported.
+   until authorization succeeds, expires, or is canceled, supplying the
+   user-configured limited-input device client ID and secret only to Google.
 3. Access and refresh tokens are kept in Credential Locker. `GetValidAccessTokenAsync`
    refreshes an expiring access token without adding an API key.
 
@@ -142,8 +143,9 @@ scope and use a bearer access token. Examples include:
 ### Uploading a test video
 
 1. In **Settings**, save a user-created **TVs and limited-input devices** OAuth
-   client ID, use **Sign in**, and enter the displayed Google code at the displayed
-   verification URL from another phone, tablet, or computer with a current browser.
+   client ID and client secret, use **Sign in**, and enter the displayed Google
+   code at the displayed verification URL from another phone, tablet, or computer
+   with a current browser.
    The Windows 10 Mobile browser is not used for this step.
 2. Open **Upload**, select a local `.mp4`, `.wmv`, `.mov`, `.avi`, or `.mkv` file,
    enter a title, optional description, and privacy level, then select **Start
