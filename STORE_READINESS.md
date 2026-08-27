@@ -1,7 +1,7 @@
 # Microsoft Store readiness
 
 The authoritative `YouTube.Uwp.sln` source is prepared as package version
-`1.0.9.0`.
+`1.5.0.0`.
 
 ## Current status
 
@@ -40,4 +40,3 @@ msbuild .\YouTube.Uwp.sln /t:Restore,Build /p:Configuration=Store /p:Platform=AR
 This produces an ARM `.appxupload` only after Store association metadata exists.
 The current release also includes an ARM sideload AppX, public certificate, and
 the complete ARM deployment dependency ZIP.
-

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased - Limited-input device upload authorization
+## v1.5.0.0 - Video upload prototype
 
 - Replaced the upload prototype's custom-redirect PKCE sign-in with Google's OAuth
   2.0 device authorization flow for TVs and limited-input devices.
@@ -12,6 +12,8 @@
 - Added a persistent, secret-safe diagnostics page for application exceptions and
   OAuth/Credential Locker milestones. The log remains available after a restart
   and can be saved as a text file.
+- Restored the Settings **About** flyout from the recovered 1.0.9.0 source.
+- Retained the existing pinned live-tile refresh behavior.
 
 ## v1.0.9.0 - Store packaging preparation and navigation fix
 

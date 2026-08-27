@@ -6,23 +6,21 @@ folders and are not referenced by the UWP project. Only the existing image files
 are linked as package assets; no recovered application code, token handling, stream
 handling, or binary libraries are reused.
 
-## Current release: v1.0.9.0
+## Current release: v1.5.0.0
 
-v1.0.9.0 is the current YourTube UWP release. It includes the ARM Windows 10
-Mobile Developer Mode sideload package and preserves the Search pivot/results
-when returning with Back after opening or playing a video. This navigation
-state is retained through `MainPage` navigation caching; Home and Categories
-video navigation remain unchanged.
+v1.5.0.0 is the current YourTube UWP release. It adds a foreground YouTube
+video-upload prototype with Google limited-input-device authorization, resumable
+transfers, cancellation, determinate progress, and persistent redacted
+diagnostics. It also restores the Settings **About** flyout from the recovered
+1.0.9.0 source.
 
-The original [`v1.0.8.4`](https://github.com/ZuneTracks/YourTube-UWP/releases/tag/v1.0.8.4)
-release included an ARM Windows 10 Mobile
-Developer Mode sideload package for devices running 10.0.15063.0 or later. The
-release assets include the AppX, its public development certificate, the two
-required ARM framework packages, and installation instructions.
-
-This release fixes the pinned live-tile refresh regression so the Start tile updates
-with the latest video metadata after playback and returns to the home screen. See
-[CHANGELOG.md](CHANGELOG.md) for the complete release history.
+The ARM Windows 10 Mobile Developer Mode sideload release supports devices
+running 10.0.15063.0 or later. The pinned live-tile refresh behavior from
+[`v1.0.8.4`](https://github.com/ZuneTracks/YourTube-UWP/releases/tag/v1.0.8.4)
+remains included: after playback, the Start tile updates with the latest video
+metadata when returning to the home screen. Release assets include the AppX, its
+public development certificate, required ARM framework packages, and deployment
+instructions. See [CHANGELOG.md](CHANGELOG.md) for the complete release history.
 
 This is not a Microsoft Store or production-signed distribution: the package uses
 the documented `YourTubeDevelopment` temporary development certificate. Do not
