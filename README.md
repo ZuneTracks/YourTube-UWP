@@ -82,6 +82,20 @@ kept separately in Credential Locker. The original recovered credential literals
 have been replaced with explicit removal markers and must be treated as compromised:
 revoke or rotate them in their original provider consoles.
 
+### Local Visual Studio 2017 build defaults
+
+For a private developer build, copy
+`YouTube.Uwp\Services\LocalBuildConfiguration.cs.template` to
+`YouTube.Uwp\Services\LocalBuildConfiguration.cs` in Solution Explorer, then replace
+all three `REPLACE_WITH_...` constants with values from your Google project. The
+project conditionally compiles that local file and `.gitignore` prevents it from being
+committed. At runtime, a value entered in Settings and stored in Credential Locker
+takes precedence; an otherwise missing value uses the non-placeholder local default.
+
+Do not use this mechanism for public, shared, or Store builds: compiled AppX files can
+be inspected. Leave the local file absent or keep all placeholders unchanged for builds
+without embedded development credentials.
+
 The app is packaged as **YourTube**. Its package identity, development publisher,
 and Credential Locker resource names are separate from earlier
 `YouTubeReconstructed` development packages, so re-enter runtime configuration

@@ -20,7 +20,7 @@ namespace YouTube.Uwp.Views
         {
             InitializeComponent();
             oauthService = new OAuthDeviceAuthorizationService(App.Configuration);
-            ApiKeyStatusText.Text = App.Configuration.HasApiKey ? "Your API key is now stored in Windows Credential Locker." : "No API key is configured.";
+            ApiKeyStatusText.Text = GetApiKeyStatus();
             OAuthClientIdBox.Text = App.Configuration.OAuthClientId ?? string.Empty;
         }
 
@@ -49,7 +49,7 @@ namespace YouTube.Uwp.Views
             {
                 App.Configuration.SaveApiKey(ApiKeyBox.Password);
                 ApiKeyBox.Password = string.Empty;
-                ApiKeyStatusText.Text = "Your API key is now stored in Windows Credential Locker.";
+                ApiKeyStatusText.Text = GetApiKeyStatus();
             }
             catch (ArgumentException exception)
             {
@@ -61,12 +61,27 @@ namespace YouTube.Uwp.Views
         {
             App.Configuration.ClearApiKey();
             ApiKeyBox.Password = string.Empty;
-            ApiKeyStatusText.Text = "API key removed.";
+            ApiKeyStatusText.Text = GetApiKeyStatus();
         }
 
         private void DiagnosticsButton_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(DiagnosticsPage));
+        }
+
+        private static string GetApiKeyStatus()
+        {
+            if (App.Configuration.HasStoredApiKey)
+            {
+                return "Your API key is stored in Windows Credential Locker.";
+            }
+
+            if (App.Configuration.HasBuildDefaultApiKey)
+            {
+                return "A local build default is configured. Saving here overrides it.";
+            }
+
+            return "No API key is configured.";
         }
 
         private void SaveOAuthSettingsButton_Click(object sender, RoutedEventArgs e)

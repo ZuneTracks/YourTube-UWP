@@ -17,3 +17,6 @@
 
 # Local release handoff artifacts
 artifacts/
+
+# Developer-only build defaults. Copy the tracked template and keep real values local.
+YouTube.Uwp/Services/LocalBuildConfiguration.cs

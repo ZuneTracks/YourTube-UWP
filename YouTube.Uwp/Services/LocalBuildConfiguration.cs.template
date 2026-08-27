@@ -1,0 +1,10 @@
+namespace YouTube.Uwp.Services
+{
+    // Copy this file to LocalBuildConfiguration.cs, replace every value, and keep that file untracked.
+    internal static class LocalBuildConfiguration
+    {
+        internal const string ApiKey = "REPLACE_WITH_YOUTUBE_DATA_API_KEY";
+        internal const string OAuthClientId = "REPLACE_WITH_LIMITED_INPUT_DEVICE_OAUTH_CLIENT_ID";
+        internal const string OAuthClientSecret = "REPLACE_WITH_LIMITED_INPUT_DEVICE_OAUTH_CLIENT_SECRET";
+    }
+}

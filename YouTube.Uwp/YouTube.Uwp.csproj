@@ -75,6 +75,9 @@
     <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
     <StorePackage>true</StorePackage>
   </PropertyGroup>
+  <PropertyGroup Condition="Exists('$(MSBuildProjectDirectory)\Services\LocalBuildConfiguration.cs')">
+    <DefineConstants>$(DefineConstants);LOCAL_BUILD_CONFIGURATION</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="5.2.9" />
   </ItemGroup>
@@ -98,6 +101,7 @@
     <Compile Include="Services\OAuthPkceService.cs" />
     <Compile Include="Services\DiagnosticLog.cs" />
     <Compile Include="Services\LiveTileStateStore.cs" />
+    <Compile Include="Services\LocalBuildConfiguration.cs" Condition="Exists('$(MSBuildProjectDirectory)\Services\LocalBuildConfiguration.cs')" />
     <Compile Include="Services\RuntimeConfiguration.cs" />
     <Compile Include="Services\SecureCredentialStore.cs" />
     <Compile Include="Services\TrendingTileService.cs" />
@@ -143,6 +147,7 @@
     <Content Include="Assets\Square44x44Logo.png" />
     <Content Include="Assets\Wide310x150Logo.png" />
     <Content Include="Assets\SplashScreen.png" />
+    <None Include="Services\LocalBuildConfiguration.cs.template" />
   </ItemGroup>
   <Target Name="ValidateStoreIdentity" BeforeTargets="PrepareForBuild" Condition="'$(StorePackage)' == 'true'">
     <Error Condition="!Exists('$(MSBuildProjectDirectory)\Package.StoreAssociation.xml')" Text="Store packaging requires Package.StoreAssociation.xml. Use Publish &gt; Associate App with the Store after reserving the app name in Partner Center; do not replace it with invented identity values." />

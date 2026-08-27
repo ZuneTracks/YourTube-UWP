@@ -28,7 +28,7 @@
                 <Border Background="{StaticResource PhoneSurfaceBrush}" Padding="14" Margin="0,0,0,14">
                     <StackPanel>
                         <TextBlock Text="public data access" Style="{StaticResource PhoneSectionTitleStyle}" />
-                        <TextBlock Text="A restricted API key is used only for read-only YouTube Data API v3 calls." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
+                        <TextBlock Text="A restricted API key is used only for read-only YouTube Data API v3 calls. Saving here overrides an optional local Visual Studio build default." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
                         <PasswordBox x:Name="ApiKeyBox" Style="{StaticResource PhonePasswordBoxStyle}" Header="Google API key" PlaceholderText="Enter a restricted API key" />
                         <StackPanel Orientation="Horizontal">
                             <Button Content="SAVE API KEY" Style="{StaticResource PhoneActionButtonStyle}" Click="SaveApiKeyButton_Click" />
@@ -41,7 +41,7 @@
                 <Border Background="{StaticResource PhoneSurfaceBrush}" Padding="14">
                     <StackPanel>
                         <TextBlock Text="google account" Style="{StaticResource PhoneSectionTitleStyle}" />
-                        <TextBlock Text="Upload uses a Google TVs and limited-input device OAuth client. No redirect URI is used. Your client secret is stored only in Windows Credential Locker." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
+                        <TextBlock Text="Upload uses a Google TVs and limited-input device OAuth client. No redirect URI is used. Saving credentials here overrides optional local Visual Studio build defaults." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
                         <TextBox x:Name="OAuthClientIdBox" Style="{StaticResource PhoneTextBoxStyle}" Header="Limited-input device OAuth client ID" PlaceholderText="Paste your Google OAuth client ID" />
                         <PasswordBox x:Name="OAuthClientSecretBox" Style="{StaticResource PhonePasswordBoxStyle}" Header="Limited-input device OAuth client secret" PlaceholderText="Paste your Google OAuth client secret" />
                         <TextBlock Text="In Google Auth Platform, create a TVs and limited-input devices client. The code below is entered on another device; it never opens a sign-in form in this app." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,8" TextWrapping="Wrap" />
