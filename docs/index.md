@@ -8,12 +8,14 @@ YourTube is an original UWP client for Windows 10 Mobile 10.0.15063 (Creators
 Update) and later. It is designed for ARM devices and uses the official YouTube
 Data API v3 for public discovery features.
 
-## Latest release: v1.0.8.4
+## Latest release: v1.5.0.0
 
-[Download the ARM Developer Mode sideload package](https://github.com/ZuneTracks/YourTube-UWP/releases/tag/v1.0.8.4)
+[Download the ARM Developer Mode sideload package](https://github.com/ZuneTracks/YourTube-UWP/releases/tag/v1.5.0.0)
 
-The `v1.0.8.4` release fixes the live-tile refresh regression and keeps the
-rotating live tile behavior working for the latest video metadata:
+The `v1.5.0.0` release adds a foreground video-upload prototype with Google
+limited-input-device authorization, resumable uploads, cancellation,
+determinate progress, and persistent redacted diagnostics. It retains the
+live-tile refresh fix and rotating behavior for the latest video metadata:
 
 - The last video selected for playback.
 - The latest public Trending Now result.
@@ -25,9 +27,15 @@ tokens, or media URLs.
 
 ## Installing
 
-Use the `INSTALL.txt` file included with the release. The ARM AppX, its public
-development certificate, and both ARM framework dependencies must be installed on
-a Windows 10 Mobile Developer Mode device.
+Download either the optimized **Release | ARM** AppX and its matching
+`YourTubeReleaseDevelopment.cer`, or the Release deployment ZIP and run its
+`Add-AppDevPackage.ps1` script. Install the certificate before the AppX. The
+deployment ZIP includes the required ARM framework dependencies.
+
+To enable uploads, configure your own Google **TVs and limited-input devices**
+OAuth client ID and client secret in **Settings**, then use the displayed
+verification URL and code from another current browser. No redirect URI is
+used. The release page contains the complete setup and troubleshooting guide.
 
 ## Important notes
 
