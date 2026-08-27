@@ -9,6 +9,9 @@
   user code, and waits for authorization on another device.
 - Kept access and refresh tokens in Windows Credential Locker, preserved foreground
   cancellation, and keeps the user-supplied client secret in Credential Locker.
+- Added a persistent, secret-safe diagnostics page for application exceptions and
+  OAuth/Credential Locker milestones. The log remains available after a restart
+  and can be saved as a text file.
 
 ## v1.0.9.0 - Store packaging preparation and navigation fix
 

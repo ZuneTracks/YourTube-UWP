@@ -43,6 +43,7 @@ namespace YouTube.Uwp.Services
         public async Task<DeviceAuthorizationInfo> BeginAuthorizationAsync(CancellationToken cancellationToken)
         {
             OAuthDeviceCredentials credentials = GetValidatedCredentials();
+            DiagnosticLog.Write("OAuth.DeviceCode", "Requesting device authorization code.");
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("client_id", credentials.ClientId);
             parameters.Add("scope", YouTubeUploadScope);
@@ -57,6 +58,7 @@ namespace YouTube.Uwp.Services
                 string content = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {
+                    DiagnosticLog.Write("OAuth.DeviceCode", "Device authorization request failed with HTTP " + ((int)response.StatusCode) + ".");
                     throw new OAuthException("Google device authorization could not start: " + content);
                 }
 
@@ -96,6 +98,7 @@ namespace YouTube.Uwp.Services
             }
 
             OAuthDeviceCredentials credentials = GetValidatedCredentials();
+            DiagnosticLog.Write("OAuth.Poll", "Waiting for device authorization approval.");
             DateTimeOffset expiresAt = DateTimeOffset.UtcNow.AddSeconds(authorization.ExpiresInSeconds);
             int pollIntervalSeconds = Math.Max(5, authorization.PollIntervalSeconds);
             while (DateTimeOffset.UtcNow < expiresAt)
@@ -112,7 +115,9 @@ namespace YouTube.Uwp.Services
                 DeviceTokenResponse response = await RequestDeviceTokenAsync(parameters, cancellationToken);
                 if (response.Token != null)
                 {
+                    DiagnosticLog.Write("OAuth.Poll", "Google returned tokens; saving them in Credential Locker.");
                     SaveToken(response.Token);
+                    DiagnosticLog.Write("OAuth.Poll", "Token persistence completed.");
                     return response.Token;
                 }
 
@@ -127,6 +132,7 @@ namespace YouTube.Uwp.Services
                     continue;
                 }
 
+                DiagnosticLog.Write("OAuth.Poll", "Google returned terminal device authorization error: " + response.Error + ".");
                 throw new OAuthException("Google device authorization was not completed: " + response.Error + ".");
             }
 
@@ -280,8 +286,11 @@ namespace YouTube.Uwp.Services
         {
             try
             {
+                DiagnosticLog.Write("OAuth.TokenStore", "Saving access token entry.");
                 SecureCredentialStore.Write(TokenAccessResource, CredentialUserName, token.AccessToken);
+                DiagnosticLog.Write("OAuth.TokenStore", "Saving refresh token entry.");
                 SecureCredentialStore.Write(TokenRefreshResource, CredentialUserName, token.RefreshToken ?? string.Empty);
+                DiagnosticLog.Write("OAuth.TokenStore", "Saving token expiry entry.");
                 SecureCredentialStore.Write(
                     TokenExpiryResource,
                     CredentialUserName,
@@ -289,6 +298,7 @@ namespace YouTube.Uwp.Services
             }
             catch (Exception exception)
             {
+                DiagnosticLog.WriteException("OAuth.TokenStore", exception);
                 throw new OAuthException(
                     "Google authorization completed, but Windows Credential Locker could not save the token (0x"
                     + exception.HResult.ToString("X8")

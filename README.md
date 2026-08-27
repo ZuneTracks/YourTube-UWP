@@ -154,6 +154,14 @@ scope and use a bearer access token. Examples include:
 3. Select **Cancel** to stop the foreground transfer. A canceled session is not
    persisted or resumed after leaving the page.
 
+### Diagnosing sign-in failures
+
+If the app closes during sign-in, reopen it and select **Settings** >
+**View diagnostics**. The page retains recent application exception HRESULTs and
+OAuth/Credential Locker milestones across restarts, and can save them as a text
+file. It deliberately excludes API keys, OAuth client credentials, device codes,
+access tokens, and refresh tokens.
+
 | Feature | v3 resource | OAuth required |
 | --- | --- | --- |
 | Subscribe / unsubscribe | `subscriptions.insert` / `subscriptions.delete` | Yes |

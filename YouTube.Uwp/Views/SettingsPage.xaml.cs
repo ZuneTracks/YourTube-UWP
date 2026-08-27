@@ -64,6 +64,11 @@ namespace YouTube.Uwp.Views
             ApiKeyStatusText.Text = "API key removed.";
         }
 
+        private void DiagnosticsButton_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(DiagnosticsPage));
+        }
+
         private void SaveOAuthSettingsButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -89,6 +94,7 @@ namespace YouTube.Uwp.Views
             CancelAuthorizationButton.IsEnabled = true;
             VerificationUrlText.Text = string.Empty;
             VerificationCodeText.Text = string.Empty;
+            DiagnosticLog.Write("OAuth.SignIn", "Device authorization requested.");
 
             try
             {
@@ -99,22 +105,32 @@ namespace YouTube.Uwp.Views
                 AuthStatusText.Text = "Enter the code in that browser. This phone will wait for Google authorization.";
                 await oauthService.CompleteAuthorizationAsync(authorization, authorizationCancellation.Token);
                 AuthStatusText.Text = "Google authorization completed. You can now upload a selected video.";
+                DiagnosticLog.Write("OAuth.SignIn", "Device authorization completed and token persistence returned.");
             }
             catch (OAuthException exception)
             {
+                DiagnosticLog.WriteException("OAuth.SignIn", exception);
                 AuthStatusText.Text = exception.Message;
             }
             catch (TaskCanceledException)
             {
+                DiagnosticLog.Write("OAuth.SignIn", "Device authorization canceled or timed out.");
                 AuthStatusText.Text = "Google authorization canceled.";
             }
             catch (OperationCanceledException)
             {
+                DiagnosticLog.Write("OAuth.SignIn", "Device authorization canceled.");
                 AuthStatusText.Text = "Google authorization canceled.";
             }
             catch (HttpRequestException)
             {
+                DiagnosticLog.Write("OAuth.SignIn", "Network failure during device authorization.");
                 AuthStatusText.Text = "Google authorization could not contact the token endpoint. Check the network connection and try again.";
+            }
+            catch (Exception exception)
+            {
+                DiagnosticLog.WriteException("OAuth.SignIn", exception);
+                AuthStatusText.Text = "Google authorization failed unexpectedly (0x" + exception.HResult.ToString("X8") + "). Open Diagnostics after restarting the app.";
             }
             finally
             {
