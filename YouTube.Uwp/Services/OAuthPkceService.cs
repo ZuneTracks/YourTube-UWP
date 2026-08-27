@@ -24,6 +24,29 @@ namespace YouTube.Uwp.Services
         {
         }
 
+        private static void ReportProgress(
+            IProgress<DeviceAuthorizationProgress> progress,
+            DateTimeOffset expiresAt,
+            int pollIntervalSeconds,
+            string status)
+        {
+            if (progress != null)
+            {
+                progress.Report(new DeviceAuthorizationProgress(
+                    Math.Max(0, (int)Math.Ceiling((expiresAt - DateTimeOffset.UtcNow).TotalSeconds)),
+                    pollIntervalSeconds,
+                    status));
+            }
+        }
+
+        private static string GetErrorIdentifier(string content)
+        {
+            JsonObject responseJson;
+            return JsonObject.TryParse(content, out responseJson)
+                ? responseJson.GetNamedString("error", "unknown_error")
+                : "unknown_error";
+        }
+
         public OAuthDeviceAuthorizationService(RuntimeConfiguration configuration, HttpClient httpClient)
         {
             if (configuration == null)
@@ -58,8 +81,15 @@ namespace YouTube.Uwp.Services
                 string content = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {
-                    DiagnosticLog.Write("OAuth.DeviceCode", "Device authorization request failed with HTTP " + ((int)response.StatusCode) + ".");
-                    throw new OAuthException("Google device authorization could not start: " + content);
+                    string error = GetErrorIdentifier(content);
+                    DiagnosticLog.Write("OAuth.DeviceCode", "Device authorization request failed with HTTP " + ((int)response.StatusCode) + ": " + error + ".");
+                    if (error == "invalid_client")
+                    {
+                        throw new OAuthException(
+                            "Google rejected the limited-input device OAuth client (invalid_client). Check the client ID and client secret.");
+                    }
+
+                    throw new OAuthException("Google device authorization could not start: " + error + ".");
                 }
 
                 JsonObject responseJson = ParseJson(content, "Google device authorization returned an invalid response.");
@@ -90,6 +120,7 @@ namespace YouTube.Uwp.Services
 
         public async Task<OAuthToken> CompleteAuthorizationAsync(
             DeviceAuthorizationInfo authorization,
+            IProgress<DeviceAuthorizationProgress> progress,
             CancellationToken cancellationToken)
         {
             if (authorization == null)
@@ -100,11 +131,20 @@ namespace YouTube.Uwp.Services
             OAuthDeviceCredentials credentials = GetValidatedCredentials();
             DiagnosticLog.Write("OAuth.Poll", "Waiting for device authorization approval.");
             DateTimeOffset expiresAt = DateTimeOffset.UtcNow.AddSeconds(authorization.ExpiresInSeconds);
-            int pollIntervalSeconds = Math.Max(5, authorization.PollIntervalSeconds);
+            int pollIntervalSeconds = authorization.PollIntervalSeconds;
             while (DateTimeOffset.UtcNow < expiresAt)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await Task.Delay(TimeSpan.FromSeconds(pollIntervalSeconds), cancellationToken);
+                ReportProgress(progress, expiresAt, pollIntervalSeconds, "Waiting for Google approval.");
+                TimeSpan remaining = expiresAt - DateTimeOffset.UtcNow;
+                TimeSpan delay = remaining < TimeSpan.FromSeconds(pollIntervalSeconds)
+                    ? remaining
+                    : TimeSpan.FromSeconds(pollIntervalSeconds);
+                await Task.Delay(delay, cancellationToken);
+                if (DateTimeOffset.UtcNow >= expiresAt)
+                {
+                    break;
+                }
 
                 Dictionary<string, string> parameters = new Dictionary<string, string>();
                 parameters.Add("device_code", authorization.DeviceCode);
@@ -123,20 +163,34 @@ namespace YouTube.Uwp.Services
 
                 if (response.Error == "authorization_pending")
                 {
+                    ReportProgress(progress, expiresAt, pollIntervalSeconds, "Waiting for Google approval.");
                     continue;
                 }
 
                 if (response.Error == "slow_down")
                 {
                     pollIntervalSeconds += 5;
+                    DiagnosticLog.Write("OAuth.Poll", "Google requested a slower polling interval.");
+                    ReportProgress(progress, expiresAt, pollIntervalSeconds, "Google requested slower polling.");
                     continue;
                 }
 
+                if (response.Error == "expired_token")
+                {
+                    throw new DeviceAuthorizationExpiredException();
+                }
+
                 DiagnosticLog.Write("OAuth.Poll", "Google returned terminal device authorization error: " + response.Error + ".");
+                if (response.Error == "invalid_client")
+                {
+                    throw new OAuthException(
+                        "Google rejected the limited-input device OAuth credentials (invalid_client). Check the client ID and client secret.");
+                }
+
                 throw new OAuthException("Google device authorization was not completed: " + response.Error + ".");
             }
 
-            throw new OAuthException("Google device authorization expired. Start sign-in again.");
+            throw new DeviceAuthorizationExpiredException();
         }
 
         public async Task<string> GetValidAccessTokenAsync()
@@ -377,6 +431,22 @@ namespace YouTube.Uwp.Services
         internal int PollIntervalSeconds { get; private set; }
     }
 
+    public sealed class DeviceAuthorizationProgress
+    {
+        public DeviceAuthorizationProgress(int secondsRemaining, int pollIntervalSeconds, string status)
+        {
+            SecondsRemaining = Math.Max(0, secondsRemaining);
+            PollIntervalSeconds = Math.Max(1, pollIntervalSeconds);
+            Status = status ?? string.Empty;
+        }
+
+        public int SecondsRemaining { get; private set; }
+
+        public int PollIntervalSeconds { get; private set; }
+
+        public string Status { get; private set; }
+    }
+
     public sealed class OAuthToken
     {
         public string AccessToken { get; set; }
@@ -386,10 +456,18 @@ namespace YouTube.Uwp.Services
         public DateTimeOffset ExpiresAt { get; set; }
     }
 
-    public sealed class OAuthException : Exception
+    public class OAuthException : Exception
     {
         public OAuthException(string message)
             : base(message)
+        {
+        }
+    }
+
+    public sealed class DeviceAuthorizationExpiredException : OAuthException
+    {
+        public DeviceAuthorizationExpiredException()
+            : base("Google device authorization expired.")
         {
         }
     }

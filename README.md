@@ -147,10 +147,13 @@ the `https://www.googleapis.com/auth/youtube.upload` scope:
 
 1. It obtains a short-lived device code and displays Google's verification URI and
    user code. The user completes authorization in a browser on another device; the
-   app does not embed a sign-in page or receive a redirect.
+   app does not embed a sign-in page or receive a redirect. Settings displays the
+   remaining code lifetime and Google's current polling interval.
 2. It polls `https://oauth2.googleapis.com/token` at Google's requested interval
    until authorization succeeds, expires, or is canceled, supplying the
    user-configured limited-input device client ID and secret only to Google.
+   A `slow_down` response increases the displayed interval. When the code expires,
+   the open Settings flow automatically obtains and displays a replacement code.
 3. Access token, refresh token, and expiry are kept as separate Credential Locker
    entries, avoiding mobile vault value-size limits. `GetValidAccessTokenAsync`
    refreshes an expiring access token without adding an API key.

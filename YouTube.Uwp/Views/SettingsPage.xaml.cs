@@ -15,11 +15,20 @@ namespace YouTube.Uwp.Views
     {
         private readonly OAuthDeviceAuthorizationService oauthService;
         private CancellationTokenSource authorizationCancellation;
+        private readonly DispatcherTimer authorizationCountdownTimer;
+        private DateTimeOffset authorizationExpiresAt;
+        private int authorizationPollIntervalSeconds;
+        private string authorizationPollingStatus;
 
         public SettingsPage()
         {
             InitializeComponent();
             oauthService = new OAuthDeviceAuthorizationService(App.Configuration);
+            authorizationCountdownTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            authorizationCountdownTimer.Tick += AuthorizationCountdownTimer_Tick;
             ApiKeyStatusText.Text = GetApiKeyStatus();
             OAuthClientIdBox.Text = App.Configuration.StoredOAuthClientId ?? string.Empty;
             UpdateAuthorizationStatus();
@@ -34,6 +43,7 @@ namespace YouTube.Uwp.Views
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             CancelAuthorization();
+            StopAuthorizationCountdown();
             base.OnNavigatedFrom(e);
         }
 
@@ -147,18 +157,36 @@ namespace YouTube.Uwp.Views
             SignOutButton.IsEnabled = false;
             VerificationUrlText.Text = string.Empty;
             VerificationCodeText.Text = string.Empty;
+            AuthorizationCountdownText.Text = string.Empty;
             DiagnosticLog.Write("OAuth.SignIn", "Device authorization requested.");
 
             try
             {
-                DeviceAuthorizationInfo authorization = await oauthService.BeginAuthorizationAsync(authorizationCancellation.Token);
-                VerificationUrlText.Text = "On another phone, tablet, or computer with a current browser, visit: "
-                    + authorization.VerificationUri.AbsoluteUri;
-                VerificationCodeText.Text = "Code: " + authorization.UserCode;
-                AuthStatusText.Text = "Enter the code in that browser. This phone will wait for Google authorization.";
-                await oauthService.CompleteAuthorizationAsync(authorization, authorizationCancellation.Token);
-                AuthStatusText.Text = "Google authorization completed. You can now upload a selected video.";
-                DiagnosticLog.Write("OAuth.SignIn", "Device authorization completed and token persistence returned.");
+                bool renewedCode = false;
+                while (true)
+                {
+                    DeviceAuthorizationInfo authorization = await oauthService.BeginAuthorizationAsync(authorizationCancellation.Token);
+                    ShowDeviceAuthorization(authorization, renewedCode);
+                    try
+                    {
+                        await oauthService.CompleteAuthorizationAsync(
+                            authorization,
+                            new Progress<DeviceAuthorizationProgress>(UpdateDeviceAuthorizationProgress),
+                            authorizationCancellation.Token);
+                        StopAuthorizationCountdown();
+                        AuthStatusText.Text = "Google authorization completed. You can now upload a selected video.";
+                        DiagnosticLog.Write("OAuth.SignIn", "Device authorization completed and token persistence returned.");
+                        break;
+                    }
+                    catch (DeviceAuthorizationExpiredException)
+                    {
+                        authorizationCancellation.Token.ThrowIfCancellationRequested();
+                        StopAuthorizationCountdown();
+                        AuthStatusText.Text = "The verification code expired. Requesting a new Google code...";
+                        DiagnosticLog.Write("OAuth.SignIn", "Device authorization code expired; requesting a replacement.");
+                        renewedCode = true;
+                    }
+                }
             }
             catch (OAuthException exception)
             {
@@ -187,6 +215,7 @@ namespace YouTube.Uwp.Views
             }
             finally
             {
+                StopAuthorizationCountdown();
                 authorizationCancellation.Dispose();
                 authorizationCancellation = null;
                 CancelAuthorizationButton.IsEnabled = false;
@@ -201,6 +230,61 @@ namespace YouTube.Uwp.Views
             VerificationCodeText.Text = string.Empty;
             AuthStatusText.Text = "Google authorization removed. Start Google sign-in before uploading.";
             UpdateAuthorizationControls();
+        }
+
+        private void ShowDeviceAuthorization(DeviceAuthorizationInfo authorization, bool renewedCode)
+        {
+            authorizationExpiresAt = DateTimeOffset.UtcNow.AddSeconds(authorization.ExpiresInSeconds);
+            authorizationPollIntervalSeconds = authorization.PollIntervalSeconds;
+            authorizationPollingStatus = "Waiting for Google approval.";
+            VerificationUrlText.Text = "On another phone, tablet, or computer with a current browser, visit: "
+                + authorization.VerificationUri.AbsoluteUri;
+            VerificationCodeText.Text = "Code: " + authorization.UserCode;
+            AuthStatusText.Text = renewedCode
+                ? "Your previous code expired. Enter the new code in that browser."
+                : "Enter the code in that browser. This phone will wait for Google authorization.";
+            UpdateAuthorizationCountdown();
+            authorizationCountdownTimer.Start();
+        }
+
+        private void UpdateDeviceAuthorizationProgress(DeviceAuthorizationProgress progress)
+        {
+            authorizationPollIntervalSeconds = progress.PollIntervalSeconds;
+            authorizationPollingStatus = progress.Status;
+            UpdateAuthorizationCountdown();
+        }
+
+        private void AuthorizationCountdownTimer_Tick(object sender, object e)
+        {
+            UpdateAuthorizationCountdown();
+        }
+
+        private void UpdateAuthorizationCountdown()
+        {
+            int secondsRemaining = Math.Max(0, (int)Math.Ceiling((authorizationExpiresAt - DateTimeOffset.UtcNow).TotalSeconds));
+            if (secondsRemaining == 0)
+            {
+                AuthorizationCountdownText.Text = "Verification code expired. Requesting a new code...";
+                return;
+            }
+
+            TimeSpan remaining = TimeSpan.FromSeconds(secondsRemaining);
+            AuthorizationCountdownText.Text = authorizationPollingStatus
+                + " Code expires in "
+                + ((int)remaining.TotalMinutes).ToString("D2")
+                + ":"
+                + remaining.Seconds.ToString("D2")
+                + ". Checking Google every "
+                + authorizationPollIntervalSeconds
+                + " seconds.";
+        }
+
+        private void StopAuthorizationCountdown()
+        {
+            authorizationCountdownTimer.Stop();
+            authorizationExpiresAt = DateTimeOffset.MinValue;
+            authorizationPollIntervalSeconds = 0;
+            authorizationPollingStatus = string.Empty;
         }
 
         private void AboutButton_Click(object sender, RoutedEventArgs e)

@@ -61,6 +61,7 @@
                         </Grid>
                         <TextBlock x:Name="VerificationUrlText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,8,0,0" TextWrapping="Wrap" />
                         <TextBlock x:Name="VerificationCodeText" FontSize="24" FontFamily="Segoe UI Semibold" Foreground="{StaticResource PhoneHighlightBrush}" Margin="0,2,0,0" TextWrapping="Wrap" />
+                        <TextBlock x:Name="AuthorizationCountdownText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,0" TextWrapping="Wrap" />
                         <TextBlock x:Name="AuthStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,8,0,0" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
