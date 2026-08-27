@@ -105,6 +105,27 @@ Do not use this mechanism for public, shared, or Store builds: compiled AppX fil
 be inspected. Leave the local file absent or keep all placeholders unchanged for builds
 without embedded development credentials.
 
+### Local Visual Studio 2017 package signing and deployment
+
+The checked-in project intentionally does not contain a private signing certificate, so
+its default local AppX output is unsigned. To deploy with the Visual Studio debugger:
+
+1. In **YourTube > Properties > Packaging**, create a test certificate whose subject
+   is `CN=YourTubeDevelopment`, install it in the current user's certificate store,
+   and copy its thumbprint.
+2. Copy `YouTube.Uwp\LocalPackageSigning.props.template` to
+   `YouTube.Uwp\LocalPackageSigning.props`, replace
+   `REPLACE_WITH_TEST_CERTIFICATE_THUMBPRINT`, and reload the project.
+3. Select **Debug | ARM**, select the developer-unlocked Windows 10 Mobile device,
+   then use **Build > Deploy Solution** or **Start Debugging**.
+
+`LocalPackageSigning.props` is ignored by Git. If `DEP0001` reports
+`0x80070490` (**Element not found**), remove an older developer/sideload
+installation of YourTube from the phone, restart it, confirm both ARM framework
+dependencies are installed, and deploy again. The source package version is `1.5.1.0`;
+it must be newer than any installed YourTube package. The published release deployment
+ZIP installs its matching certificate and dependencies automatically.
+
 The app is packaged as **YourTube**. Its package identity, development publisher,
 and Credential Locker resource names are separate from earlier
 `YouTubeReconstructed` development packages, so re-enter runtime configuration

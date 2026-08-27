@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.5.1.0 - Device authorization and developer deployment
+
+- Added a live device-code countdown, server-timed polling status, visible
+  `slow_down` handling, automatic code renewal after expiration, and explicit
+  `invalid_client` feedback.
+- Clarified the Settings device sign-in and sign-out states, and keeps managed
+  local build defaults hidden from editable fields.
+- Added an ignored local Visual Studio 2017 package-signing configuration
+  template for physical-device debugging builds.
+
 ## v1.5.0.0 - Video upload prototype
 
 - Replaced the upload prototype's custom-redirect PKCE sign-in with Google's OAuth

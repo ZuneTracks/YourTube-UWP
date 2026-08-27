@@ -1,0 +1,11 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    Copy this file to LocalPackageSigning.props. Keep it untracked.
+    Create a test certificate in Visual Studio, then paste its thumbprint below.
+    The certificate subject must match Package.appxmanifest: CN=YourTubeDevelopment.
+  -->
+  <PropertyGroup>
+    <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
+    <PackageCertificateThumbprint>REPLACE_WITH_TEST_CERTIFICATE_THUMBPRINT</PackageCertificateThumbprint>
+  </PropertyGroup>
+</Project>
