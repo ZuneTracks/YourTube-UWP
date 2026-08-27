@@ -40,14 +40,16 @@
                 <Border Background="{StaticResource PhoneSurfaceBrush}" Padding="14">
                     <StackPanel>
                         <TextBlock Text="google account" Style="{StaticResource PhoneSectionTitleStyle}" />
-                        <TextBlock Text="Upload uses your OAuth client ID, the system browser, and PKCE. No client secret is used or stored." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
-                        <TextBox x:Name="OAuthClientIdBox" Style="{StaticResource PhoneTextBoxStyle}" Header="OAuth client ID" PlaceholderText="Paste your Google OAuth client ID" />
-                        <TextBox x:Name="RedirectUriBox" Style="{StaticResource PhoneTextBoxStyle}" Header="Redirect URI" PlaceholderText="com.zunetracks.yourtube:/oauth2redirect" />
-                        <TextBlock Text="Register this exact redirect URI for your Google OAuth client. It must match this package's protocol handler." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,8" TextWrapping="Wrap" />
+                        <TextBlock Text="Upload uses a Google TVs and limited-input device OAuth client. No redirect URI or client secret is used or stored." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
+                        <TextBox x:Name="OAuthClientIdBox" Style="{StaticResource PhoneTextBoxStyle}" Header="Limited-input device OAuth client ID" PlaceholderText="Paste your Google OAuth client ID" />
+                        <TextBlock Text="In Google Auth Platform, create a TVs and limited-input devices client. The code below is entered on another device; it never opens a sign-in form in this app." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,8" TextWrapping="Wrap" />
                         <StackPanel Orientation="Horizontal">
-                            <Button Content="SAVE OAUTH" Style="{StaticResource PhoneActionButtonStyle}" Click="SaveOAuthSettingsButton_Click" />
+                            <Button Content="SAVE CLIENT ID" Style="{StaticResource PhoneActionButtonStyle}" Click="SaveOAuthSettingsButton_Click" />
                             <Button Content="SIGN IN" Style="{StaticResource PhoneOutlineButtonStyle}" Click="SignInButton_Click" />
+                            <Button x:Name="CancelAuthorizationButton" Content="CANCEL" Style="{StaticResource PhoneOutlineButtonStyle}" Click="CancelAuthorizationButton_Click" IsEnabled="False" />
                         </StackPanel>
+                        <TextBlock x:Name="VerificationUrlText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,8,0,0" TextWrapping="Wrap" />
+                        <TextBlock x:Name="VerificationCodeText" FontSize="24" FontFamily="Segoe UI Semibold" Foreground="{StaticResource PhoneHighlightBrush}" Margin="0,2,0,0" TextWrapping="Wrap" />
                         <TextBlock x:Name="AuthStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,8,0,0" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>

@@ -21,7 +21,7 @@ namespace YouTube.Uwp.Views
         public UploadVideoPage()
         {
             InitializeComponent();
-            OAuthPkceService oauthService = new OAuthPkceService(App.Configuration);
+            OAuthDeviceAuthorizationService oauthService = new OAuthDeviceAuthorizationService(App.Configuration);
             uploadClient = new YouTubeResumableUploadClient(oauthService.GetValidAccessTokenAsync);
         }
 

@@ -27,12 +27,6 @@
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
-      <Extensions>
-        <!-- Change this value and OAuthPkceService.PackagedRedirectProtocol together before shipping. -->
-        <uap:Extension Category="windows.protocol">
-          <uap:Protocol Name="com.zunetracks.yourtube" />
-        </uap:Extension>
-      </Extensions>
     </Application>
   </Applications>
   <Capabilities>

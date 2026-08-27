@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased - Limited-input device upload authorization
+
+- Replaced the upload prototype's custom-redirect PKCE sign-in with Google's OAuth
+  2.0 device authorization flow for TVs and limited-input devices.
+- Removed the redirect URI and protocol-handler setup. The app now asks only for a
+  limited-input device client ID, shows Google's verification URL and user code,
+  and waits for authorization on another device.
+- Kept access and refresh tokens in Windows Credential Locker, preserved foreground
+  cancellation, and continued to use no client secret.
+
 ## v1.0.9.0 - Store packaging preparation and navigation fix
 
 - Added an explicit ARM Store-upload configuration that creates an unsigned

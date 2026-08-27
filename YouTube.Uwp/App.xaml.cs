@@ -1,5 +1,3 @@
-using System;
-using System.Net.Http;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
@@ -10,50 +8,19 @@ namespace YouTube.Uwp
 {
     sealed partial class App : Application
     {
-        private readonly OAuthPkceService oauthService;
-
         public App()
         {
             InitializeComponent();
             Suspending += OnSuspending;
             Configuration = new RuntimeConfiguration();
-            oauthService = new OAuthPkceService(Configuration);
         }
 
         public static RuntimeConfiguration Configuration { get; private set; }
-
-        public event EventHandler<AuthorizationCompletedEventArgs> AuthorizationCompleted;
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
             EnsureMainPage();
             Window.Current.Activate();
-        }
-
-        protected override async void OnActivated(IActivatedEventArgs args)
-        {
-            EnsureMainPage();
-            Window.Current.Activate();
-
-            ProtocolActivatedEventArgs protocolArgs = args as ProtocolActivatedEventArgs;
-            if (protocolArgs == null)
-            {
-                return;
-            }
-
-            try
-            {
-                await oauthService.CompleteAuthorizationAsync(protocolArgs.Uri);
-                OnAuthorizationCompleted("Google authorization completed. You can now upload a selected video.");
-            }
-            catch (OAuthException exception)
-            {
-                OnAuthorizationCompleted(exception.Message);
-            }
-            catch (HttpRequestException)
-            {
-                OnAuthorizationCompleted("Google authorization could not contact the token endpoint. Check the network connection and try again.");
-            }
         }
 
         private static void EnsureMainPage()
@@ -76,24 +43,5 @@ namespace YouTube.Uwp
             SuspendingDeferral deferral = e.SuspendingOperation.GetDeferral();
             deferral.Complete();
         }
-
-        private void OnAuthorizationCompleted(string message)
-        {
-            EventHandler<AuthorizationCompletedEventArgs> handler = AuthorizationCompleted;
-            if (handler != null)
-            {
-                handler(this, new AuthorizationCompletedEventArgs(message));
-            }
-        }
-    }
-
-    public sealed class AuthorizationCompletedEventArgs : EventArgs
-    {
-        public AuthorizationCompletedEventArgs(string message)
-        {
-            Message = message;
-        }
-
-        public string Message { get; private set; }
     }
 }

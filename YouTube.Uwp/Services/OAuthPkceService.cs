@@ -2,124 +2,140 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Data.Json;
-using Windows.Security.Cryptography;
-using Windows.Security.Cryptography.Core;
-using Windows.Storage.Streams;
-using Windows.System;
 
 namespace YouTube.Uwp.Services
 {
-    public sealed class OAuthPkceService
+    public sealed class OAuthDeviceAuthorizationService
     {
-        // The UWP protocol handler is declared at package build time and cannot be changed at runtime.
-        public const string PackagedRedirectProtocol = "com.zunetracks.yourtube";
-        public const string PackagedRedirectUri = PackagedRedirectProtocol + ":/oauth2redirect";
         public const string YouTubeUploadScope = "https://www.googleapis.com/auth/youtube.upload";
-        private const string AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+        private const string DeviceAuthorizationEndpoint = "https://oauth2.googleapis.com/device/code";
         private const string TokenEndpoint = "https://oauth2.googleapis.com/token";
-        private const string PendingAuthorizationResource = "YourTube.PendingAuthorization";
         private const string TokenResource = "YourTube.OAuthToken";
         private const string CredentialUserName = "CurrentUser";
-        private static readonly HttpClient HttpClient = new HttpClient();
         private readonly RuntimeConfiguration configuration;
+        private readonly HttpClient httpClient;
 
-        public OAuthPkceService(RuntimeConfiguration configuration)
+        public OAuthDeviceAuthorizationService(RuntimeConfiguration configuration)
+            : this(configuration, new HttpClient())
+        {
+        }
+
+        public OAuthDeviceAuthorizationService(RuntimeConfiguration configuration, HttpClient httpClient)
         {
             if (configuration == null)
             {
                 throw new ArgumentNullException("configuration");
             }
 
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException("httpClient");
+            }
+
             this.configuration = configuration;
+            this.httpClient = httpClient;
         }
 
-        public async Task<bool> BeginAuthorizationAsync()
+        public async Task<DeviceAuthorizationInfo> BeginAuthorizationAsync(CancellationToken cancellationToken)
         {
-            OAuthSettings settings = GetValidatedSettings();
-            string state = CreateRandomUrlSafeValue();
-            string verifier = CreateRandomUrlSafeValue();
-            string challenge = CreateCodeChallenge(verifier);
-
-            SecureCredentialStore.Write(PendingAuthorizationResource, CredentialUserName, state + "\n" + verifier);
-
+            string clientId = GetValidatedClientId();
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("client_id", settings.ClientId);
-            parameters.Add("redirect_uri", settings.RedirectUri);
-            parameters.Add("response_type", "code");
+            parameters.Add("client_id", clientId);
             parameters.Add("scope", YouTubeUploadScope);
-            parameters.Add("code_challenge", challenge);
-            parameters.Add("code_challenge_method", "S256");
-            parameters.Add("state", state);
-            parameters.Add("access_type", "offline");
-            parameters.Add("prompt", "consent");
 
-            return await Launcher.LaunchUriAsync(BuildUri(AuthorizationEndpoint, parameters));
+            using (HttpResponseMessage response = await httpClient.SendAsync(
+                new HttpRequestMessage(HttpMethod.Post, DeviceAuthorizationEndpoint)
+                {
+                    Content = new FormUrlEncodedContent(parameters)
+                },
+                cancellationToken))
+            {
+                string content = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new OAuthException("Google device authorization could not start: " + content);
+                }
+
+                JsonObject responseJson = ParseJson(content, "Google device authorization returned an invalid response.");
+                string deviceCode = responseJson.GetNamedString("device_code", string.Empty);
+                string userCode = responseJson.GetNamedString("user_code", string.Empty);
+                string verificationUrl = responseJson.GetNamedString("verification_url", string.Empty);
+                if (string.IsNullOrWhiteSpace(verificationUrl))
+                {
+                    verificationUrl = responseJson.GetNamedString("verification_uri", string.Empty);
+                }
+
+                Uri verificationUri;
+                if (string.IsNullOrWhiteSpace(deviceCode)
+                    || string.IsNullOrWhiteSpace(userCode)
+                    || !Uri.TryCreate(verificationUrl, UriKind.Absolute, out verificationUri))
+                {
+                    throw new OAuthException("Google device authorization did not return a usable verification code and URL.");
+                }
+
+                return new DeviceAuthorizationInfo(
+                    deviceCode,
+                    userCode,
+                    verificationUri,
+                    responseJson.GetNamedNumber("expires_in", 1800),
+                    responseJson.GetNamedNumber("interval", 5));
+            }
         }
 
-        public async Task<OAuthToken> CompleteAuthorizationAsync(Uri activationUri)
+        public async Task<OAuthToken> CompleteAuthorizationAsync(
+            DeviceAuthorizationInfo authorization,
+            CancellationToken cancellationToken)
         {
-            if (activationUri == null)
+            if (authorization == null)
             {
-                throw new OAuthException("Google returned an empty authorization callback.");
+                throw new ArgumentNullException("authorization");
             }
 
-            OAuthSettings settings = GetValidatedSettings();
-            Uri expectedRedirectUri = new Uri(settings.RedirectUri);
-            if (!string.Equals(activationUri.Scheme, expectedRedirectUri.Scheme, StringComparison.OrdinalIgnoreCase)
-                || !string.Equals(activationUri.Host, expectedRedirectUri.Host, StringComparison.OrdinalIgnoreCase)
-                || !string.Equals(activationUri.AbsolutePath, expectedRedirectUri.AbsolutePath, StringComparison.Ordinal))
+            string clientId = GetValidatedClientId();
+            DateTimeOffset expiresAt = DateTimeOffset.UtcNow.AddSeconds(authorization.ExpiresInSeconds);
+            int pollIntervalSeconds = Math.Max(5, authorization.PollIntervalSeconds);
+            while (DateTimeOffset.UtcNow < expiresAt)
             {
-                throw new OAuthException("The authorization callback did not match the configured redirect URI.");
+                cancellationToken.ThrowIfCancellationRequested();
+                await Task.Delay(TimeSpan.FromSeconds(pollIntervalSeconds), cancellationToken);
+
+                Dictionary<string, string> parameters = new Dictionary<string, string>();
+                parameters.Add("device_code", authorization.DeviceCode);
+                parameters.Add("client_id", clientId);
+                parameters.Add("grant_type", "urn:ietf:params:oauth:grant-type:device_code");
+
+                DeviceTokenResponse response = await RequestDeviceTokenAsync(parameters, cancellationToken);
+                if (response.Token != null)
+                {
+                    SaveToken(response.Token);
+                    return response.Token;
+                }
+
+                if (response.Error == "authorization_pending")
+                {
+                    continue;
+                }
+
+                if (response.Error == "slow_down")
+                {
+                    pollIntervalSeconds += 5;
+                    continue;
+                }
+
+                throw new OAuthException("Google device authorization was not completed: " + response.Error + ".");
             }
 
-            Dictionary<string, string> callback = ParseQuery(activationUri.Query);
-            string providerError;
-            if (callback.TryGetValue("error", out providerError))
-            {
-                SecureCredentialStore.Delete(PendingAuthorizationResource, CredentialUserName);
-                throw new OAuthException("Google authorization was not completed: " + providerError + ".");
-            }
-
-            string authorizationCode;
-            string returnedState;
-            if (!callback.TryGetValue("code", out authorizationCode) || !callback.TryGetValue("state", out returnedState))
-            {
-                throw new OAuthException("The authorization callback did not contain both code and state values.");
-            }
-
-            string pending = SecureCredentialStore.Read(PendingAuthorizationResource, CredentialUserName);
-            if (string.IsNullOrWhiteSpace(pending))
-            {
-                throw new OAuthException("No matching authorization request is pending. Start sign-in again.");
-            }
-
-            string[] pendingValues = pending.Split(new[] { '\n' }, 2);
-            if (pendingValues.Length != 2 || !string.Equals(pendingValues[0], returnedState, StringComparison.Ordinal))
-            {
-                SecureCredentialStore.Delete(PendingAuthorizationResource, CredentialUserName);
-                throw new OAuthException("The authorization callback state did not match the sign-in request.");
-            }
-
-            SecureCredentialStore.Delete(PendingAuthorizationResource, CredentialUserName);
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("code", authorizationCode);
-            parameters.Add("client_id", settings.ClientId);
-            parameters.Add("redirect_uri", settings.RedirectUri);
-            parameters.Add("grant_type", "authorization_code");
-            parameters.Add("code_verifier", pendingValues[1]);
-
-            OAuthToken token = await RequestTokenAsync(parameters);
-            SaveToken(token);
-            return token;
+            throw new OAuthException("Google device authorization expired. Start sign-in again.");
         }
 
         public async Task<string> GetValidAccessTokenAsync()
         {
-            OAuthSettings settings = GetValidatedSettings();
+            string clientId = GetValidatedClientId();
             OAuthToken token = ReadToken();
-            if (token == null || string.IsNullOrWhiteSpace(token.RefreshToken))
+            if (token == null)
             {
                 throw new OAuthException("No Google account is authorized. Start sign-in first.");
             }
@@ -129,36 +145,70 @@ namespace YouTube.Uwp.Services
                 return token.AccessToken;
             }
 
+            if (string.IsNullOrWhiteSpace(token.RefreshToken))
+            {
+                throw new OAuthException("Google authorization needs to be completed again before uploading.");
+            }
+
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("client_id", settings.ClientId);
+            parameters.Add("client_id", clientId);
             parameters.Add("refresh_token", token.RefreshToken);
             parameters.Add("grant_type", "refresh_token");
-            OAuthToken refreshed = await RequestTokenAsync(parameters);
+            OAuthToken refreshed = await RequestTokenAsync(parameters, CancellationToken.None);
             refreshed.RefreshToken = token.RefreshToken;
             SaveToken(refreshed);
             return refreshed.AccessToken;
         }
 
-        public static bool IsPackagedRedirectUri(string redirectUri)
+        private async Task<DeviceTokenResponse> RequestDeviceTokenAsync(
+            IReadOnlyDictionary<string, string> parameters,
+            CancellationToken cancellationToken)
         {
-            return !string.IsNullOrWhiteSpace(redirectUri)
-                && string.Equals(redirectUri.Trim(), PackagedRedirectUri, StringComparison.OrdinalIgnoreCase);
+            using (HttpResponseMessage response = await httpClient.SendAsync(
+                new HttpRequestMessage(HttpMethod.Post, TokenEndpoint)
+                {
+                    Content = new FormUrlEncodedContent(parameters)
+                },
+                cancellationToken))
+            {
+                string content = await response.Content.ReadAsStringAsync();
+                JsonObject responseJson = ParseJson(content, "Google token endpoint returned an invalid response.");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new DeviceTokenResponse(null, responseJson.GetNamedString("error", "unknown_error"));
+                }
+
+                return new DeviceTokenResponse(CreateToken(responseJson), null);
+            }
         }
 
-        private async Task<OAuthToken> RequestTokenAsync(IReadOnlyDictionary<string, string> parameters)
+        private async Task<OAuthToken> RequestTokenAsync(
+            IReadOnlyDictionary<string, string> parameters,
+            CancellationToken cancellationToken)
         {
-            HttpResponseMessage response = await HttpClient.PostAsync(TokenEndpoint, new FormUrlEncodedContent(parameters));
-            string content = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
+            using (HttpResponseMessage response = await httpClient.SendAsync(
+                new HttpRequestMessage(HttpMethod.Post, TokenEndpoint)
+                {
+                    Content = new FormUrlEncodedContent(parameters)
+                },
+                cancellationToken))
             {
-                throw new OAuthException("Google token exchange failed: " + content);
-            }
+                string content = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new OAuthException("Google token refresh failed: " + content);
+                }
 
-            JsonObject responseJson = JsonObject.Parse(content);
+                return CreateToken(ParseJson(content, "Google token endpoint returned an invalid response."));
+            }
+        }
+
+        private static OAuthToken CreateToken(JsonObject responseJson)
+        {
             string accessToken = responseJson.GetNamedString("access_token", string.Empty);
             if (string.IsNullOrWhiteSpace(accessToken))
             {
-                throw new OAuthException("Google token exchange did not return an access token.");
+                throw new OAuthException("Google token endpoint did not return an access token.");
             }
 
             return new OAuthToken
@@ -169,19 +219,19 @@ namespace YouTube.Uwp.Services
             };
         }
 
-        private OAuthSettings GetValidatedSettings()
+        private string GetValidatedClientId()
         {
             if (string.IsNullOrWhiteSpace(configuration.OAuthClientId))
             {
-                throw new OAuthException("Set an OAuth client ID before signing in.");
+                throw new OAuthException("Set a limited-input device OAuth client ID before signing in.");
             }
 
-            if (!IsPackagedRedirectUri(configuration.OAuthRedirectUri))
-            {
-                throw new OAuthException("Set the OAuth redirect URI to " + PackagedRedirectUri + " before signing in.");
-            }
+            return configuration.OAuthClientId;
+        }
 
-            return new OAuthSettings(configuration.OAuthClientId, configuration.OAuthRedirectUri);
+        public static void ClearStoredToken()
+        {
+            SecureCredentialStore.Delete(TokenResource, CredentialUserName);
         }
 
         private OAuthToken ReadToken()
@@ -220,51 +270,15 @@ namespace YouTube.Uwp.Services
                 Encode(token.AccessToken) + "\n" + Encode(token.RefreshToken) + "\n" + token.ExpiresAt.ToUnixTimeSeconds().ToString());
         }
 
-        private static string CreateRandomUrlSafeValue()
+        private static JsonObject ParseJson(string content, string errorMessage)
         {
-            return ToUrlSafeBase64(CryptographicBuffer.EncodeToBase64String(CryptographicBuffer.GenerateRandom(32)));
-        }
-
-        private static string CreateCodeChallenge(string verifier)
-        {
-            IBuffer source = CryptographicBuffer.ConvertStringToBinary(verifier, BinaryStringEncoding.Utf8);
-            HashAlgorithmProvider provider = HashAlgorithmProvider.OpenAlgorithm(HashAlgorithmNames.Sha256);
-            return ToUrlSafeBase64(CryptographicBuffer.EncodeToBase64String(provider.HashData(source)));
-        }
-
-        private static string ToUrlSafeBase64(string value)
-        {
-            return value.TrimEnd('=').Replace('+', '-').Replace('/', '_');
-        }
-
-        private static Uri BuildUri(string endpoint, IDictionary<string, string> parameters)
-        {
-            List<string> query = new List<string>();
-            foreach (KeyValuePair<string, string> parameter in parameters)
+            JsonObject value;
+            if (!JsonObject.TryParse(content, out value))
             {
-                query.Add(Uri.EscapeDataString(parameter.Key) + "=" + Uri.EscapeDataString(parameter.Value));
+                throw new OAuthException(errorMessage);
             }
 
-            return new Uri(endpoint + "?" + string.Join("&", query));
-        }
-
-        private static Dictionary<string, string> ParseQuery(string query)
-        {
-            Dictionary<string, string> values = new Dictionary<string, string>(StringComparer.Ordinal);
-            foreach (string part in query.TrimStart('?').Split('&'))
-            {
-                if (string.IsNullOrEmpty(part))
-                {
-                    continue;
-                }
-
-                int separator = part.IndexOf('=');
-                string key = separator < 0 ? part : part.Substring(0, separator);
-                string value = separator < 0 ? string.Empty : part.Substring(separator + 1);
-                values[Uri.UnescapeDataString(key.Replace("+", " "))] = Uri.UnescapeDataString(value.Replace("+", " "));
-            }
-
-            return values;
+            return value;
         }
 
         private static string Encode(string value)
@@ -277,18 +291,45 @@ namespace YouTube.Uwp.Services
             return Encoding.UTF8.GetString(Convert.FromBase64String(value));
         }
 
-        private sealed class OAuthSettings
+        private sealed class DeviceTokenResponse
         {
-            public OAuthSettings(string clientId, string redirectUri)
+            public DeviceTokenResponse(OAuthToken token, string error)
             {
-                ClientId = clientId;
-                RedirectUri = redirectUri;
+                Token = token;
+                Error = error;
             }
 
-            public string ClientId { get; private set; }
+            public OAuthToken Token { get; private set; }
 
-            public string RedirectUri { get; private set; }
+            public string Error { get; private set; }
         }
+    }
+
+    public sealed class DeviceAuthorizationInfo
+    {
+        public DeviceAuthorizationInfo(
+            string deviceCode,
+            string userCode,
+            Uri verificationUri,
+            double expiresInSeconds,
+            double pollIntervalSeconds)
+        {
+            DeviceCode = deviceCode;
+            UserCode = userCode;
+            VerificationUri = verificationUri;
+            ExpiresInSeconds = Math.Max(1, (int)expiresInSeconds);
+            PollIntervalSeconds = Math.Max(1, (int)pollIntervalSeconds);
+        }
+
+        internal string DeviceCode { get; private set; }
+
+        public string UserCode { get; private set; }
+
+        public Uri VerificationUri { get; private set; }
+
+        internal int ExpiresInSeconds { get; private set; }
+
+        internal int PollIntervalSeconds { get; private set; }
     }
 
     public sealed class OAuthToken

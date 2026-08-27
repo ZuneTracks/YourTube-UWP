@@ -8,16 +8,10 @@ namespace YouTube.Uwp.Services
         private const string ApiKeyResource = "YourTube.ApiKey";
         private const string ApiKeyUserName = "PublicReadOnly";
         private const string OAuthClientIdKey = "OAuthClientId";
-        private const string OAuthRedirectUriKey = "OAuthRedirectUri";
 
         public string OAuthClientId
         {
             get { return ReadSetting(OAuthClientIdKey); }
-        }
-
-        public string OAuthRedirectUri
-        {
-            get { return ReadSetting(OAuthRedirectUriKey) ?? OAuthPkceService.PackagedRedirectUri; }
         }
 
         public bool HasApiKey
@@ -45,23 +39,20 @@ namespace YouTube.Uwp.Services
             SecureCredentialStore.Delete(ApiKeyResource, ApiKeyUserName);
         }
 
-        public void SaveOAuthSettings(string clientId, string redirectUri)
+        public void SaveOAuthClientId(string clientId)
         {
             if (string.IsNullOrWhiteSpace(clientId))
             {
-                throw new ArgumentException("An OAuth client ID is required.", "clientId");
+                throw new ArgumentException("A limited-input device OAuth client ID is required.", "clientId");
             }
 
-            if (!OAuthPkceService.IsPackagedRedirectUri(redirectUri))
+            string normalizedClientId = clientId.Trim();
+            if (!string.Equals(OAuthClientId, normalizedClientId, StringComparison.Ordinal))
             {
-                throw new ArgumentException(
-                    "The redirect URI must exactly match the protocol handler declared in Package.appxmanifest: "
-                    + OAuthPkceService.PackagedRedirectUri + ".",
-                    "redirectUri");
+                OAuthDeviceAuthorizationService.ClearStoredToken();
             }
 
-            SaveSetting(OAuthClientIdKey, clientId.Trim());
-            SaveSetting(OAuthRedirectUriKey, OAuthPkceService.PackagedRedirectUri);
+            SaveSetting(OAuthClientIdKey, normalizedClientId);
         }
 
         private static string ReadSetting(string key)

@@ -70,22 +70,11 @@ styling.
    viable quota and application restrictions. Enter it at runtime in the app. It is
    stored in Windows Credential Locker, is sent only as the `key` parameter on
    public read-only v3 requests, and is never used for account authorization.
-3. Create an **iOS** OAuth client for this UWP custom-scheme flow, using
-   `com.zunetracks.yourtube` as its Bundle ID. Do not create or ship a client
-   secret. Configure the generated client ID at runtime in the app.
-4. Register the package's exact redirect URI,
-   `com.zunetracks.yourtube:/oauth2redirect`, for the
-   OAuth client, then enter that same URI in the app's **Redirect URI** field. UWP
-   protocol registrations are fixed in the package, so the runtime setting rejects
-   mismatches rather than launching a callback the app cannot receive. To ship a
-   different scheme, change both the `com.zunetracks.yourtube` protocol in
-   `YouTube.Uwp\Package.appxmanifest` and
-   `OAuthPkceService.PackagedRedirectProtocol`, then rebuild the package. Register
-   the resulting `your-scheme:/oauth2redirect` URI only when the selected
-   Google OAuth client type and current Google policy support it. Google controls
-   acceptable client-type/redirect combinations; do not work around a rejected
-   redirect with an embedded secret or an in-app web view.
-5. Ensure the OAuth consent screen, test users, scopes, and any verification
+3. Create a **TVs and limited-input devices** OAuth client. Do not create or ship a
+   client secret, and do not configure a redirect URI. Configure the generated
+   client ID at runtime in the app. Changing that client ID clears the existing
+   authorization, so complete sign-in again.
+4. Ensure the OAuth consent screen, test users, scopes, and any verification
    requirements are completed in Google Cloud before production use.
 
 No API key, OAuth client ID, OAuth client secret, developer key, analytics key, or
@@ -95,9 +84,9 @@ have been replaced with explicit removal markers and must be treated as compromi
 revoke or rotate them in their original provider consoles.
 
 The app is packaged as **YourTube**. Its package identity, development publisher,
-Credential Locker resource names, and OAuth redirect protocol are separate from
-earlier `YouTubeReconstructed` development packages, so re-enter runtime
-configuration after installing YourTube.
+and Credential Locker resource names are separate from earlier
+`YouTubeReconstructed` development packages, so re-enter runtime configuration
+after installing YourTube.
 
 ## Implemented public API v3 mappings
 
@@ -131,18 +120,16 @@ API key or on the retired WP8 scheduled agent.
 
 ## Account authorization architecture
 
-`OAuthPkceService` uses Google OAuth 2.0 authorization code flow with PKCE and the
-`https://www.googleapis.com/auth/youtube.upload` scope:
+`OAuthDeviceAuthorizationService` uses Google OAuth 2.0 device authorization with
+the `https://www.googleapis.com/auth/youtube.upload` scope:
 
-1. It creates a cryptographically random `state` and code verifier, hashes the
-   verifier using SHA-256 for `code_challenge=S256`, and stores the short-lived
-   transaction in Credential Locker.
-2. It opens the authorization request through `Windows.System.Launcher`, which
-   delegates to the system browser rather than embedding credentials in the app.
-3. UWP protocol activation validates the callback state and exchanges the code at
-   `https://oauth2.googleapis.com/token` with `code_verifier`, client ID, and
-   redirect URI only. A client secret is neither requested nor supported.
-4. Access and refresh tokens are kept in Credential Locker. `GetValidAccessTokenAsync`
+1. It obtains a short-lived device code and displays Google's verification URI and
+   user code. The user completes authorization in a browser on another device; the
+   app does not embed a sign-in page or receive a redirect.
+2. It polls `https://oauth2.googleapis.com/token` at Google's requested interval
+   until authorization succeeds, expires, or is canceled. A client secret is
+   neither requested nor supported.
+3. Access and refresh tokens are kept in Credential Locker. `GetValidAccessTokenAsync`
    refreshes an expiring access token without adding an API key.
 
 The **Upload** page uses a brokered UWP file picker, sends `snippet` and `status`
@@ -154,9 +141,9 @@ scope and use a bearer access token. Examples include:
 
 ### Uploading a test video
 
-1. In **Settings**, save a user-created OAuth client ID and the exact
-   `com.zunetracks.yourtube:/oauth2redirect` URI, then use **Sign in** and
-   complete authorization in the system browser.
+1. In **Settings**, save a user-created **TVs and limited-input devices** OAuth
+   client ID, use **Sign in**, and enter the displayed Google code at the displayed
+   verification URL on another device.
 2. Open **Upload**, select a local `.mp4`, `.wmv`, `.mov`, `.avi`, or `.mkv` file,
    enter a title, optional description, and privacy level, then select **Start
    upload**.
