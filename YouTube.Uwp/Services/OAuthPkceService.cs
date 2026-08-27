@@ -223,7 +223,7 @@ namespace YouTube.Uwp.Services
             return new OAuthToken
             {
                 AccessToken = accessToken,
-                RefreshToken = responseJson.GetNamedString("refresh_token", null),
+                RefreshToken = responseJson.GetNamedString("refresh_token", string.Empty),
                 ExpiresAt = DateTimeOffset.UtcNow.AddSeconds(responseJson.GetNamedNumber("expires_in", 3600))
             };
         }
