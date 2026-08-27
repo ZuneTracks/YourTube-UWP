@@ -50,6 +50,10 @@
                         <TextBlock x:Name="AuthStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,8,0,0" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
+
+                <StackPanel Margin="0,12,0,0">
+                    <Button Content="ABOUT" Style="{StaticResource PhoneOutlineButtonStyle}" Click="AboutButton_Click" HorizontalAlignment="Left" />
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>
