@@ -21,7 +21,7 @@ namespace YouTube.Uwp.Views
             InitializeComponent();
             oauthService = new OAuthDeviceAuthorizationService(App.Configuration);
             ApiKeyStatusText.Text = GetApiKeyStatus();
-            OAuthClientIdBox.Text = App.Configuration.OAuthClientId ?? string.Empty;
+            OAuthClientIdBox.Text = App.Configuration.StoredOAuthClientId ?? string.Empty;
             UpdateAuthorizationStatus();
         }
 
@@ -80,7 +80,7 @@ namespace YouTube.Uwp.Views
 
             if (App.Configuration.HasBuildDefaultApiKey)
             {
-                return "A local build default is configured. Saving here overrides it.";
+                return "Using built-in YourTube configuration for public data. Saving here overrides it.";
             }
 
             return "No API key is configured.";
@@ -92,9 +92,17 @@ namespace YouTube.Uwp.Views
             {
                 AuthStatusText.Text = "A Google account is authorized for video uploads.";
             }
+            else if (App.Configuration.HasStoredOAuthDeviceCredentials)
+            {
+                AuthStatusText.Text = "Saved OAuth credentials are configured. Start Google sign-in before uploading.";
+            }
+            else if (App.Configuration.HasBuildDefaultOAuthDeviceCredentials)
+            {
+                AuthStatusText.Text = "Using built-in YourTube configuration for uploads. Start Google sign-in before uploading.";
+            }
             else if (App.Configuration.HasOAuthDeviceCredentials)
             {
-                AuthStatusText.Text = "OAuth credentials are configured. Start Google sign-in before uploading.";
+                AuthStatusText.Text = "Managed OAuth configuration is available. Start Google sign-in before uploading.";
             }
             else
             {

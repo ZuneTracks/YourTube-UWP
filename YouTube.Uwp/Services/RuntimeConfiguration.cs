@@ -16,6 +16,11 @@ namespace YouTube.Uwp.Services
             get { return FirstConfiguredValue(ReadSetting(OAuthClientIdKey), GetBuildDefaultOAuthClientId()); }
         }
 
+        public string StoredOAuthClientId
+        {
+            get { return ReadSetting(OAuthClientIdKey); }
+        }
+
         public bool HasApiKey
         {
             get { return !string.IsNullOrWhiteSpace(GetApiKey()); }
@@ -27,6 +32,25 @@ namespace YouTube.Uwp.Services
             {
                 return !string.IsNullOrWhiteSpace(OAuthClientId)
                     && !string.IsNullOrWhiteSpace(GetOAuthClientSecret());
+            }
+        }
+
+        public bool HasStoredOAuthDeviceCredentials
+        {
+            get
+            {
+                return !string.IsNullOrWhiteSpace(StoredOAuthClientId)
+                    && !string.IsNullOrWhiteSpace(
+                        SecureCredentialStore.Read(OAuthClientSecretResource, OAuthClientSecretUserName));
+            }
+        }
+
+        public bool HasBuildDefaultOAuthDeviceCredentials
+        {
+            get
+            {
+                return !string.IsNullOrWhiteSpace(GetBuildDefaultOAuthClientId())
+                    && !string.IsNullOrWhiteSpace(GetBuildDefaultOAuthClientSecret());
             }
         }
 

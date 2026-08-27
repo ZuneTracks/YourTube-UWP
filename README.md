@@ -98,6 +98,8 @@ constants with values from your Google project, then reload the project or reope
 solution before building. `.gitignore` prevents the local file from being committed.
 At runtime, a value entered in Settings and stored in Credential Locker takes
 precedence; an otherwise missing value uses the non-placeholder local default.
+Settings leaves managed values blank and never displays the client secret. Its status
+identifies when the app is using built-in local configuration.
 
 Do not use this mechanism for public, shared, or Store builds: compiled AppX files can
 be inspected. Leave the local file absent or keep all placeholders unchanged for builds
