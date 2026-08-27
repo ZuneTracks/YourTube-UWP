@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Data.Json;
@@ -13,7 +12,9 @@ namespace YouTube.Uwp.Services
         public const string YouTubeUploadScope = "https://www.googleapis.com/auth/youtube.upload";
         private const string DeviceAuthorizationEndpoint = "https://oauth2.googleapis.com/device/code";
         private const string TokenEndpoint = "https://oauth2.googleapis.com/token";
-        private const string TokenResource = "YourTube.OAuthToken";
+        private const string TokenAccessResource = "YourTube.OAuthToken.Access";
+        private const string TokenRefreshResource = "YourTube.OAuthToken.Refresh";
+        private const string TokenExpiryResource = "YourTube.OAuthToken.Expiry";
         private const string CredentialUserName = "CurrentUser";
         private readonly RuntimeConfiguration configuration;
         private readonly HttpClient httpClient;
@@ -239,43 +240,60 @@ namespace YouTube.Uwp.Services
 
         public static void ClearStoredToken()
         {
-            SecureCredentialStore.Delete(TokenResource, CredentialUserName);
+            SecureCredentialStore.Delete(TokenAccessResource, CredentialUserName);
+            SecureCredentialStore.Delete(TokenRefreshResource, CredentialUserName);
+            SecureCredentialStore.Delete(TokenExpiryResource, CredentialUserName);
         }
 
         private OAuthToken ReadToken()
         {
-            string persisted = SecureCredentialStore.Read(TokenResource, CredentialUserName);
-            if (string.IsNullOrWhiteSpace(persisted))
+            string accessToken = SecureCredentialStore.Read(TokenAccessResource, CredentialUserName);
+            string refreshToken = SecureCredentialStore.Read(TokenRefreshResource, CredentialUserName);
+            string expiryValue = SecureCredentialStore.Read(TokenExpiryResource, CredentialUserName);
+            if (string.IsNullOrWhiteSpace(accessToken)
+                && string.IsNullOrWhiteSpace(refreshToken)
+                && string.IsNullOrWhiteSpace(expiryValue))
             {
                 return null;
             }
 
-            string[] fields = persisted.Split(new[] { '\n' });
-            if (fields.Length != 3)
+            if (string.IsNullOrWhiteSpace(accessToken) || string.IsNullOrWhiteSpace(expiryValue))
             {
                 throw new OAuthException("The stored OAuth token is malformed. Sign in again.");
             }
 
             long expiresAt;
-            if (!long.TryParse(fields[2], out expiresAt))
+            if (!long.TryParse(expiryValue, out expiresAt))
             {
                 throw new OAuthException("The stored OAuth token expiration is malformed. Sign in again.");
             }
 
             return new OAuthToken
             {
-                AccessToken = Decode(fields[0]),
-                RefreshToken = Decode(fields[1]),
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
                 ExpiresAt = DateTimeOffset.FromUnixTimeSeconds(expiresAt)
             };
         }
 
         private static void SaveToken(OAuthToken token)
         {
-            SecureCredentialStore.Write(
-                TokenResource,
-                CredentialUserName,
-                Encode(token.AccessToken) + "\n" + Encode(token.RefreshToken) + "\n" + token.ExpiresAt.ToUnixTimeSeconds().ToString());
+            try
+            {
+                SecureCredentialStore.Write(TokenAccessResource, CredentialUserName, token.AccessToken);
+                SecureCredentialStore.Write(TokenRefreshResource, CredentialUserName, token.RefreshToken ?? string.Empty);
+                SecureCredentialStore.Write(
+                    TokenExpiryResource,
+                    CredentialUserName,
+                    token.ExpiresAt.ToUnixTimeSeconds().ToString());
+            }
+            catch (Exception exception)
+            {
+                throw new OAuthException(
+                    "Google authorization completed, but Windows Credential Locker could not save the token (0x"
+                    + exception.HResult.ToString("X8")
+                    + ").");
+            }
         }
 
         private static JsonObject ParseJson(string content, string errorMessage)
@@ -287,16 +305,6 @@ namespace YouTube.Uwp.Services
             }
 
             return value;
-        }
-
-        private static string Encode(string value)
-        {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(value ?? string.Empty));
-        }
-
-        private static string Decode(string value)
-        {
-            return Encoding.UTF8.GetString(Convert.FromBase64String(value));
         }
 
         private sealed class DeviceTokenResponse

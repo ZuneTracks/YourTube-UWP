@@ -130,7 +130,8 @@ the `https://www.googleapis.com/auth/youtube.upload` scope:
 2. It polls `https://oauth2.googleapis.com/token` at Google's requested interval
    until authorization succeeds, expires, or is canceled, supplying the
    user-configured limited-input device client ID and secret only to Google.
-3. Access and refresh tokens are kept in Credential Locker. `GetValidAccessTokenAsync`
+3. Access token, refresh token, and expiry are kept as separate Credential Locker
+   entries, avoiding mobile vault value-size limits. `GetValidAccessTokenAsync`
    refreshes an expiring access token without adding an API key.
 
 The **Upload** page uses a brokered UWP file picker, sends `snippet` and `status`

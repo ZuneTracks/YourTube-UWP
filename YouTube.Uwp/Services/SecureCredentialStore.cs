@@ -24,6 +24,12 @@ namespace YouTube.Uwp.Services
 
         public static void Write(string resource, string userName, string value)
         {
+            if (string.IsNullOrEmpty(value))
+            {
+                Delete(resource, userName);
+                return;
+            }
+
             string previousValue = Read(resource, userName);
             if (previousValue != null)
             {
