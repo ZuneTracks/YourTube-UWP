@@ -284,7 +284,8 @@ namespace YouTube.Uwp.Services
 
         private OAuthDeviceCredentials GetValidatedCredentials()
         {
-            if (string.IsNullOrWhiteSpace(configuration.OAuthClientId))
+            string clientId = configuration.OAuthClientId;
+            if (string.IsNullOrWhiteSpace(clientId))
             {
                 throw new OAuthException("Set a limited-input device OAuth client ID before signing in.");
             }
@@ -295,7 +296,16 @@ namespace YouTube.Uwp.Services
                 throw new OAuthException("Set the limited-input device OAuth client secret before signing in.");
             }
 
-            return new OAuthDeviceCredentials(configuration.OAuthClientId, clientSecret);
+            DiagnosticLog.Write(
+                "OAuth.Credentials",
+                "Using "
+                + configuration.GetOAuthDeviceCredentialSource()
+                + " OAuth credentials (client ID length "
+                + clientId.Length
+                + ", client secret length "
+                + clientSecret.Length
+                + ").");
+            return new OAuthDeviceCredentials(clientId, clientSecret);
         }
 
         public static void ClearStoredToken()

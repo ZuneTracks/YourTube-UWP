@@ -108,7 +108,9 @@ namespace YouTube.Uwp.Views
             }
             else if (App.Configuration.HasBuildDefaultOAuthDeviceCredentials)
             {
-                AuthStatusText.Text = "Using built-in YourTube configuration for uploads. Start Google sign-in before uploading.";
+                AuthStatusText.Text = App.Configuration.HasIncompleteStoredOAuthDeviceCredentials
+                    ? "An incomplete saved OAuth override was ignored. Using built-in YourTube configuration for uploads."
+                    : "Using built-in YourTube configuration for uploads. Start Google sign-in before uploading.";
             }
             else if (App.Configuration.HasOAuthDeviceCredentials)
             {

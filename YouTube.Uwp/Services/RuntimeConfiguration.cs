@@ -13,7 +13,12 @@ namespace YouTube.Uwp.Services
 
         public string OAuthClientId
         {
-            get { return FirstConfiguredValue(ReadSetting(OAuthClientIdKey), GetBuildDefaultOAuthClientId()); }
+            get
+            {
+                return HasStoredOAuthDeviceCredentials
+                    ? StoredOAuthClientId
+                    : GetBuildDefaultOAuthClientId();
+            }
         }
 
         public string StoredOAuthClientId
@@ -88,9 +93,37 @@ namespace YouTube.Uwp.Services
 
         public string GetOAuthClientSecret()
         {
-            return FirstConfiguredValue(
-                SecureCredentialStore.Read(OAuthClientSecretResource, OAuthClientSecretUserName),
-                GetBuildDefaultOAuthClientSecret());
+            return HasStoredOAuthDeviceCredentials
+                ? SecureCredentialStore.Read(OAuthClientSecretResource, OAuthClientSecretUserName)
+                : GetBuildDefaultOAuthClientSecret();
+        }
+
+        public bool HasIncompleteStoredOAuthDeviceCredentials
+        {
+            get
+            {
+                bool hasStoredClientId = !string.IsNullOrWhiteSpace(StoredOAuthClientId);
+                bool hasStoredClientSecret = !string.IsNullOrWhiteSpace(
+                    SecureCredentialStore.Read(OAuthClientSecretResource, OAuthClientSecretUserName));
+                return hasStoredClientId != hasStoredClientSecret;
+            }
+        }
+
+        public string GetOAuthDeviceCredentialSource()
+        {
+            if (HasStoredOAuthDeviceCredentials)
+            {
+                return "saved";
+            }
+
+            if (HasBuildDefaultOAuthDeviceCredentials)
+            {
+                return HasIncompleteStoredOAuthDeviceCredentials
+                    ? "built-in (incomplete saved override ignored)"
+                    : "built-in";
+            }
+
+            return "unconfigured";
         }
 
         public void SaveOAuthDeviceSettings(string clientId, string clientSecret)

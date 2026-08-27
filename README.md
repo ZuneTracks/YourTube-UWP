@@ -97,7 +97,9 @@ already conditionally includes that filename. Replace all three `REPLACE_WITH_..
 constants with values from your Google project, then reload the project or reopen the
 solution before building. `.gitignore` prevents the local file from being committed.
 At runtime, a value entered in Settings and stored in Credential Locker takes
-precedence; an otherwise missing value uses the non-placeholder local default.
+precedence only when both OAuth values are stored as a complete pair; an otherwise
+missing or incomplete saved pair uses the non-placeholder local default pair. This
+prevents a stale saved client ID or secret from being combined with an embedded value.
 Settings leaves managed values blank and never displays the client secret. Its status
 identifies when the app is using built-in local configuration.
 
