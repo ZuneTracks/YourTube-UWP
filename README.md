@@ -143,7 +143,8 @@ scope and use a bearer access token. Examples include:
 
 1. In **Settings**, save a user-created **TVs and limited-input devices** OAuth
    client ID, use **Sign in**, and enter the displayed Google code at the displayed
-   verification URL on another device.
+   verification URL from another phone, tablet, or computer with a current browser.
+   The Windows 10 Mobile browser is not used for this step.
 2. Open **Upload**, select a local `.mp4`, `.wmv`, `.mov`, `.avi`, or `.mkv` file,
    enter a title, optional description, and privacy level, then select **Start
    upload**.

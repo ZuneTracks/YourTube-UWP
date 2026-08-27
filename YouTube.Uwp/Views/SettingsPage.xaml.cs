@@ -3,7 +3,6 @@ using Windows.ApplicationModel;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -93,10 +92,10 @@ namespace YouTube.Uwp.Views
             try
             {
                 DeviceAuthorizationInfo authorization = await oauthService.BeginAuthorizationAsync(authorizationCancellation.Token);
-                VerificationUrlText.Text = "On another device, visit: " + authorization.VerificationUri.AbsoluteUri;
+                VerificationUrlText.Text = "On another phone, tablet, or computer with a current browser, visit: "
+                    + authorization.VerificationUri.AbsoluteUri;
                 VerificationCodeText.Text = "Code: " + authorization.UserCode;
-                AuthStatusText.Text = "Waiting for Google authorization. This code expires soon.";
-                await Launcher.LaunchUriAsync(authorization.VerificationUri);
+                AuthStatusText.Text = "Enter the code in that browser. This phone will wait for Google authorization.";
                 await oauthService.CompleteAuthorizationAsync(authorization, authorizationCancellation.Token);
                 AuthStatusText.Text = "Google authorization completed. You can now upload a selected video.";
             }
