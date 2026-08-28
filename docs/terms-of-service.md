@@ -10,6 +10,9 @@ These Terms of Service ("Terms") govern your use of the YourTube UWP application
 ("YourTube" or the "App"). By installing or using the App, you agree to these
 Terms. If you do not agree, do not install or use the App.
 
+The [Privacy Policy](privacy-policy.md) explains how the App handles
+information.
+
 ## The App
 
 YourTube is an independent, unofficial client for discovering public YouTube
