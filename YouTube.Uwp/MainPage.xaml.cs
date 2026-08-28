@@ -22,8 +22,10 @@ namespace YouTube.Uwp
         private string subscriptionsNextPageToken;
         private string playlistsNextPageToken;
         private string playlistVideosNextPageToken;
+        private string uploadedVideosNextPageToken;
         private string likedVideosNextPageToken;
         private string selectedPlaylistId;
+        private string uploadsPlaylistId;
         private string profileLoadStage;
 
         public MainPage()
@@ -34,6 +36,7 @@ namespace YouTube.Uwp
             Subscriptions = new ObservableCollection<SubscriptionSummary>();
             Playlists = new ObservableCollection<PlaylistSummary>();
             PlaylistVideos = new ObservableCollection<VideoSummary>();
+            UploadedVideos = new ObservableCollection<VideoSummary>();
             LikedVideos = new ObservableCollection<VideoSummary>();
             DataContext = this;
             client = new YouTubeDataApiClient(App.Configuration.GetApiKey);
@@ -51,6 +54,8 @@ namespace YouTube.Uwp
         public ObservableCollection<PlaylistSummary> Playlists { get; private set; }
 
         public ObservableCollection<VideoSummary> PlaylistVideos { get; private set; }
+
+        public ObservableCollection<VideoSummary> UploadedVideos { get; private set; }
 
         public ObservableCollection<VideoSummary> LikedVideos { get; private set; }
 
@@ -199,11 +204,14 @@ namespace YouTube.Uwp
             subscriptionsNextPageToken = null;
             playlistsNextPageToken = null;
             playlistVideosNextPageToken = null;
+            uploadedVideosNextPageToken = null;
             likedVideosNextPageToken = null;
             selectedPlaylistId = null;
+            uploadsPlaylistId = null;
             Subscriptions.Clear();
             Playlists.Clear();
             PlaylistVideos.Clear();
+            UploadedVideos.Clear();
             LikedVideos.Clear();
             ProfileTitleText.Text = string.Empty;
             ProfileMetadataText.Text = string.Empty;
@@ -213,6 +221,7 @@ namespace YouTube.Uwp
             SubscriptionsStatusText.Text = string.Empty;
             PlaylistsStatusText.Text = string.Empty;
             PlaylistVideosStatusText.Text = string.Empty;
+            UploadedVideosStatusText.Text = string.Empty;
             LikedVideosStatusText.Text = string.Empty;
             UpdateProfileControls();
 
@@ -234,6 +243,27 @@ namespace YouTube.Uwp
                     + channel.ViewCount.ToString("N0")
                     + " views";
                 ProfileDescriptionText.Text = channel.Description;
+
+                uploadsPlaylistId = channel.UploadsPlaylistId;
+                if (string.IsNullOrWhiteSpace(uploadsPlaylistId))
+                {
+                    UploadedVideosStatusText.Text = "YouTube did not provide an uploads playlist for this channel.";
+                }
+                else
+                {
+                    profileLoadStage = "uploaded videos";
+                    DataPage<VideoSummary> uploadedVideos = await authenticatedClient.GetPlaylistVideosAsync(
+                        uploadsPlaylistId,
+                        null,
+                        25);
+                    foreach (VideoSummary video in uploadedVideos.Items)
+                    {
+                        UploadedVideos.Add(video);
+                    }
+
+                    uploadedVideosNextPageToken = uploadedVideos.NextPageToken;
+                    UploadedVideosStatusText.Text = UploadedVideos.Count + " uploaded videos loaded.";
+                }
 
                 profileLoadStage = "subscriptions";
                 DataPage<SubscriptionSummary> subscriptions = await authenticatedClient.GetSubscriptionsAsync(null, 25);
@@ -338,6 +368,63 @@ namespace YouTube.Uwp
             catch (Exception exception)
             {
                 ShowProfileFailure(profileLoadStage, exception, SubscriptionsStatusText);
+            }
+            finally
+            {
+                profileRequestInProgress = false;
+                UpdateProfileControls();
+            }
+        }
+
+        private async void MoreUploadedVideosButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (profileRequestInProgress || string.IsNullOrWhiteSpace(uploadsPlaylistId)
+                || string.IsNullOrWhiteSpace(uploadedVideosNextPageToken))
+            {
+                return;
+            }
+
+            profileRequestInProgress = true;
+            UploadedVideosStatusText.Text = "Loading more uploaded videos...";
+            UpdateProfileControls();
+            try
+            {
+                profileLoadStage = "uploaded videos";
+                DataPage<VideoSummary> page = await authenticatedClient.GetPlaylistVideosAsync(
+                    uploadsPlaylistId,
+                    uploadedVideosNextPageToken,
+                    25);
+                foreach (VideoSummary video in page.Items)
+                {
+                    UploadedVideos.Add(video);
+                }
+
+                uploadedVideosNextPageToken = page.NextPageToken;
+                UploadedVideosStatusText.Text = UploadedVideos.Count + " uploaded videos loaded.";
+            }
+            catch (OAuthException exception)
+            {
+                UploadedVideosStatusText.Text = exception.Message;
+            }
+            catch (YouTubeApiException exception)
+            {
+                UploadedVideosStatusText.Text = GetProfileApiErrorMessage(exception);
+            }
+            catch (YouTubeApiResponseException exception)
+            {
+                UploadedVideosStatusText.Text = exception.Message;
+            }
+            catch (TaskCanceledException)
+            {
+                UploadedVideosStatusText.Text = "The uploaded videos request timed out. Check the network connection and try again.";
+            }
+            catch (HttpRequestException)
+            {
+                UploadedVideosStatusText.Text = "The uploaded videos request could not be reached. Check the network connection.";
+            }
+            catch (Exception exception)
+            {
+                ShowProfileFailure(profileLoadStage, exception, UploadedVideosStatusText);
             }
             finally
             {
@@ -570,6 +657,7 @@ namespace YouTube.Uwp
             bool canLoad = !profileRequestInProgress;
             RefreshProfileButton.IsEnabled = canLoad;
             MoreSubscriptionsButton.IsEnabled = canLoad && !string.IsNullOrWhiteSpace(subscriptionsNextPageToken);
+            MoreUploadedVideosButton.IsEnabled = canLoad && !string.IsNullOrWhiteSpace(uploadedVideosNextPageToken);
             MorePlaylistsButton.IsEnabled = canLoad && !string.IsNullOrWhiteSpace(playlistsNextPageToken);
             MorePlaylistVideosButton.IsEnabled = canLoad && !string.IsNullOrWhiteSpace(playlistVideosNextPageToken);
             LoadLikedVideosButton.IsEnabled = canLoad && profileLoaded;

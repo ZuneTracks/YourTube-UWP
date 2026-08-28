@@ -15,6 +15,8 @@
   to terminate the app.
 - Moved the Upload Video action into the Profile pivot beside Refresh Profile and
   removed the redundant Home pivot Search action.
+- Added the authorized channel's uploaded videos through its YouTube-provided
+  uploads playlist, including paginated loading.
 
 ## v1.6.0.0 - ARM uploader release
 

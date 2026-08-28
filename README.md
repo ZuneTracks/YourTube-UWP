@@ -158,6 +158,7 @@ authenticated YouTube Data API v3 connection:
 | Profile data | Official YouTube Data API v3 request |
 | --- | --- |
 | Authorized channel/account summary | `channels.list?part=snippet,contentDetails,statistics&mine=true` |
+| Uploaded videos | `playlistItems.list?part=snippet,contentDetails&playlistId={channel.uploads}` |
 | Subscriptions | `subscriptions.list?part=snippet,contentDetails&mine=true` |
 | Playlists | `playlists.list?part=snippet,contentDetails&mine=true` |
 | Playlist videos | `playlistItems.list?part=snippet,contentDetails&playlistId=...` |

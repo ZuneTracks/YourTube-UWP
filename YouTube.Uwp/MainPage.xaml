@@ -198,6 +198,11 @@
                             </StackPanel>
                         </Border>
 
+                        <TextBlock Text="uploaded videos" Style="{StaticResource PhoneSectionTitleStyle}" />
+                        <TextBlock x:Name="UploadedVideosStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,3,0,8" TextWrapping="Wrap" />
+                        <ItemsControl ItemsSource="{Binding UploadedVideos}" ItemTemplate="{StaticResource ProfileVideoTemplate}" />
+                        <Button x:Name="MoreUploadedVideosButton" Content="LOAD MORE UPLOADED VIDEOS" Style="{StaticResource PhoneOutlineButtonStyle}" Click="MoreUploadedVideosButton_Click" HorizontalAlignment="Left" IsEnabled="False" />
+
                         <TextBlock Text="subscriptions" Style="{StaticResource PhoneSectionTitleStyle}" />
                         <TextBlock x:Name="SubscriptionsStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,3,0,8" TextWrapping="Wrap" />
                         <ListView x:Name="SubscriptionsList" ItemsSource="{Binding Subscriptions}" ItemTemplate="{StaticResource SubscriptionTemplate}" SelectionMode="None" />
