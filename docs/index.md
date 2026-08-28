@@ -28,6 +28,10 @@ Without a previously played video, the tile starts with Trending Now. The tile
 stores only public video metadata locally and does not expose API keys, OAuth
 tokens, or media URLs.
 
+## Legal
+
+Use of the App is governed by the [Terms of Service](terms-of-service.md).
+
 ## Installing
 
 Download either the optimized **Release | ARM** AppX and its matching
