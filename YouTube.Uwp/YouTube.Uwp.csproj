@@ -95,7 +95,9 @@
     <Compile Include="MainPage.xaml.cs" />
     <Compile Include="Models\ChannelDetails.cs" />
     <Compile Include="Models\DataPage.cs" />
+    <Compile Include="Models\PlaylistSummary.cs" />
     <Compile Include="Models\PivotHeader.cs" />
+    <Compile Include="Models\SubscriptionSummary.cs" />
     <Compile Include="Models\VideoDetails.cs" />
     <Compile Include="Models\VideoCategory.cs" />
     <Compile Include="Models\VideoSummary.cs" />

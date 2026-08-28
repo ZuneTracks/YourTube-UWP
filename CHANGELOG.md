@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased - User Profile pivot prototype
+
+- Added an authenticated **Profile** pivot with the authorized channel summary,
+  subscriptions, playlists, playlist-video browsing, and liked-video reads.
+- Added loading, error, and next-page states for authenticated collections.
+- Clearly labels Watch History and Watch Later as unavailable because YouTube Data
+  API v3 does not expose them as readable collections.
+- Device authorization now requests the existing `youtube.upload` scope plus the
+  minimum `youtube.readonly` scope required for account reads. Existing tokens
+  must be authorized again after this change.
+
 ## v1.6.0.0 - ARM uploader release
 
 - Published the current uploader, device authorization, and local developer

@@ -48,7 +48,7 @@ Windows App SDK dependency, so every app API used is available on 15063.
 
 The UWP UI intentionally echoes the recovered Windows Phone application without
 reusing its unsupported Silverlight controls: a dark header, red accent strip,
-pivot-style **Home**, **Search**, and **Categories** sections, an active-pivot
+pivot-style **Home**, **Search**, **Categories**, and **Profile** sections, an active-pivot
 underline, large thumbnail cards, and compact metadata/detail pages. The header's
 **Settings** button opens the separate credentials page. It uses only UWP XAML
 controls supported by Windows 10 Mobile 15063.
@@ -150,6 +150,24 @@ The public client maps results into platform-independent `VideoSummary`,
 that inherit WP8 `ResultItem`, dispatch through WP8 view-model singletons, and
 contain platform-specific commands and transfer objects.
 
+### Authenticated Profile pivot
+
+After device authorization, the Profile pivot reads only data exposed by the
+authenticated YouTube Data API v3 connection:
+
+| Profile data | Official YouTube Data API v3 request |
+| --- | --- |
+| Authorized channel/account summary | `channels.list?part=snippet,contentDetails,statistics&mine=true` |
+| Subscriptions | `subscriptions.list?part=snippet,contentDetails&mine=true` |
+| Playlists | `playlists.list?part=snippet,contentDetails&mine=true` |
+| Playlist videos | `playlistItems.list?part=snippet,contentDetails&playlistId=...` |
+| Liked videos | `videos.list?part=snippet,contentDetails,statistics,status&myRating=like` |
+
+Collections load in pages of up to 25 items and expose a load-more action when
+the API returns a next-page token. Watch History and Watch Later are explicitly
+unsupported: YouTube Data API v3 does not expose either as a readable
+collection, so the app does not pretend to provide them.
+
 ### Trending live tile
 
 After a successful **Trending Now** request, YourTube persists the leading public
@@ -167,7 +185,8 @@ API key or on the retired WP8 scheduled agent.
 ## Account authorization architecture
 
 `OAuthDeviceAuthorizationService` uses Google OAuth 2.0 device authorization with
-the `https://www.googleapis.com/auth/youtube.upload` scope:
+the `https://www.googleapis.com/auth/youtube.upload` and
+`https://www.googleapis.com/auth/youtube.readonly` scopes:
 
 1. It obtains a short-lived device code and displays Google's verification URI and
    user code. The user completes authorization in a browser on another device; the
@@ -182,12 +201,20 @@ the `https://www.googleapis.com/auth/youtube.upload` scope:
    entries, avoiding mobile vault value-size limits. `GetValidAccessTokenAsync`
    refreshes an expiring access token without adding an API key.
 
+The Profile pivot uses the read-only scope to request the authorized channel,
+subscriptions, playlists, playlist videos, and liked videos. The upload scope is
+retained for the existing uploader. Tokens issued before the Profile pivot do
+not gain the new scope automatically; sign out and complete device sign-in again
+if Profile reports an authorization or insufficient-permission error.
+
 The **Upload** page uses a brokered UWP file picker, sends `snippet` and `status`
 metadata to `videos.insert`, and uploads the selected file in 256 KiB resumable
 chunks. It reports determinate byte progress and permits cancellation between
 chunks. The uploader requires completed OAuth authorization and never uses the
-public API key. Other account features must explicitly request the minimum OAuth
-scope and use a bearer access token. Examples include:
+public API key. The Profile pivot uses `youtube.readonly` for the authorized
+channel, subscriptions, playlists, playlist videos, and liked videos. Other
+account features must explicitly request the minimum OAuth scope and use a bearer
+access token. Examples include:
 
 ### Uploading a test video
 

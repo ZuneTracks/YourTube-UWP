@@ -15,21 +15,43 @@ namespace YouTube.Uwp
     public sealed partial class MainPage : Page
     {
         private readonly YouTubeDataApiClient client;
+        private readonly YouTubeDataApiClient authenticatedClient;
         private readonly TrendingTileService trendingTileService;
+        private bool profileLoaded;
+        private bool profileRequestInProgress;
+        private string subscriptionsNextPageToken;
+        private string playlistsNextPageToken;
+        private string playlistVideosNextPageToken;
+        private string likedVideosNextPageToken;
+        private string selectedPlaylistId;
 
         public MainPage()
         {
             InitializeComponent();
             Results = new ObservableCollection<VideoSummary>();
             Categories = new ObservableCollection<VideoCategory>();
+            Subscriptions = new ObservableCollection<SubscriptionSummary>();
+            Playlists = new ObservableCollection<PlaylistSummary>();
+            PlaylistVideos = new ObservableCollection<VideoSummary>();
+            LikedVideos = new ObservableCollection<VideoSummary>();
             DataContext = this;
             client = new YouTubeDataApiClient(App.Configuration.GetApiKey);
+            OAuthDeviceAuthorizationService oauthService = new OAuthDeviceAuthorizationService(App.Configuration);
+            authenticatedClient = new YouTubeDataApiClient(App.Configuration.GetApiKey, oauthService.GetValidAccessTokenAsync);
             trendingTileService = new TrendingTileService();
         }
 
         public ObservableCollection<VideoSummary> Results { get; private set; }
 
         public ObservableCollection<VideoCategory> Categories { get; private set; }
+
+        public ObservableCollection<SubscriptionSummary> Subscriptions { get; private set; }
+
+        public ObservableCollection<PlaylistSummary> Playlists { get; private set; }
+
+        public ObservableCollection<VideoSummary> PlaylistVideos { get; private set; }
+
+        public ObservableCollection<VideoSummary> LikedVideos { get; private set; }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
         {
@@ -149,6 +171,389 @@ namespace YouTube.Uwp
             {
                 await LoadCategoriesAsync();
             }
+
+            if (MainPivot.SelectedIndex == 3 && !profileLoaded)
+            {
+                await LoadProfileAsync();
+            }
+        }
+
+        private async void RefreshProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadProfileAsync();
+        }
+
+        private async Task LoadProfileAsync()
+        {
+            if (profileRequestInProgress)
+            {
+                return;
+            }
+
+            profileRequestInProgress = true;
+            profileLoaded = false;
+            subscriptionsNextPageToken = null;
+            playlistsNextPageToken = null;
+            playlistVideosNextPageToken = null;
+            likedVideosNextPageToken = null;
+            selectedPlaylistId = null;
+            Subscriptions.Clear();
+            Playlists.Clear();
+            PlaylistVideos.Clear();
+            LikedVideos.Clear();
+            ProfileTitleText.Text = string.Empty;
+            ProfileMetadataText.Text = string.Empty;
+            ProfileDescriptionText.Text = string.Empty;
+            SelectedPlaylistText.Text = string.Empty;
+            ProfileStatusText.Text = "Loading authenticated profile...";
+            SubscriptionsStatusText.Text = string.Empty;
+            PlaylistsStatusText.Text = string.Empty;
+            PlaylistVideosStatusText.Text = string.Empty;
+            LikedVideosStatusText.Text = string.Empty;
+            UpdateProfileControls();
+
+            try
+            {
+                ChannelDetails channel = await authenticatedClient.GetMyChannelAsync();
+                if (channel == null)
+                {
+                    ProfileStatusText.Text = "Google returned no channel for the authorized account.";
+                    return;
+                }
+
+                ProfileTitleText.Text = channel.Title;
+                ProfileMetadataText.Text = channel.SubscriberCount.ToString("N0")
+                    + " subscribers | "
+                    + channel.VideoCount.ToString("N0")
+                    + " videos | "
+                    + channel.ViewCount.ToString("N0")
+                    + " views";
+                ProfileDescriptionText.Text = channel.Description;
+
+                DataPage<SubscriptionSummary> subscriptions = await authenticatedClient.GetSubscriptionsAsync(null, 25);
+                foreach (SubscriptionSummary subscription in subscriptions.Items)
+                {
+                    Subscriptions.Add(subscription);
+                }
+
+                subscriptionsNextPageToken = subscriptions.NextPageToken;
+                SubscriptionsStatusText.Text = Subscriptions.Count + " subscriptions loaded.";
+
+                DataPage<PlaylistSummary> playlists = await authenticatedClient.GetPlaylistsAsync(null, 25);
+                foreach (PlaylistSummary playlist in playlists.Items)
+                {
+                    Playlists.Add(playlist);
+                }
+
+                playlistsNextPageToken = playlists.NextPageToken;
+                PlaylistsStatusText.Text = Playlists.Count + " playlists loaded. Select one to view its videos.";
+                PlaylistVideosStatusText.Text = "Select a playlist above to load its videos.";
+                LikedVideosStatusText.Text = "Select Load liked videos to request your liked collection.";
+                ProfileStatusText.Text = "Profile loaded.";
+                profileLoaded = true;
+            }
+            catch (OAuthException exception)
+            {
+                ProfileStatusText.Text = exception.Message + " If this account was authorized before Profile was added, sign in again to grant the YouTube read-only scope.";
+            }
+            catch (InvalidOperationException exception)
+            {
+                ProfileStatusText.Text = exception.Message;
+            }
+            catch (YouTubeApiException exception)
+            {
+                ProfileStatusText.Text = GetProfileApiErrorMessage(exception);
+            }
+            catch (YouTubeApiResponseException exception)
+            {
+                ProfileStatusText.Text = exception.Message;
+            }
+            catch (TaskCanceledException)
+            {
+                ProfileStatusText.Text = "The authenticated YouTube request timed out. Check the network connection and try again.";
+            }
+            catch (HttpRequestException)
+            {
+                ProfileStatusText.Text = "The authenticated YouTube API could not be reached. Check the network connection.";
+            }
+            finally
+            {
+                profileRequestInProgress = false;
+                UpdateProfileControls();
+            }
+        }
+
+        private async void MoreSubscriptionsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (profileRequestInProgress || string.IsNullOrWhiteSpace(subscriptionsNextPageToken))
+            {
+                return;
+            }
+
+            profileRequestInProgress = true;
+            UpdateProfileControls();
+            try
+            {
+                DataPage<SubscriptionSummary> page = await authenticatedClient.GetSubscriptionsAsync(subscriptionsNextPageToken, 25);
+                foreach (SubscriptionSummary subscription in page.Items)
+                {
+                    Subscriptions.Add(subscription);
+                }
+
+                subscriptionsNextPageToken = page.NextPageToken;
+                SubscriptionsStatusText.Text = Subscriptions.Count + " subscriptions loaded.";
+            }
+            catch (OAuthException exception)
+            {
+                SubscriptionsStatusText.Text = exception.Message;
+            }
+            catch (YouTubeApiException exception)
+            {
+                SubscriptionsStatusText.Text = GetProfileApiErrorMessage(exception);
+            }
+            catch (YouTubeApiResponseException exception)
+            {
+                SubscriptionsStatusText.Text = exception.Message;
+            }
+            catch (TaskCanceledException)
+            {
+                SubscriptionsStatusText.Text = "The subscriptions request timed out. Check the network connection and try again.";
+            }
+            catch (HttpRequestException)
+            {
+                SubscriptionsStatusText.Text = "The subscriptions request could not be reached. Check the network connection.";
+            }
+            finally
+            {
+                profileRequestInProgress = false;
+                UpdateProfileControls();
+            }
+        }
+
+        private async void MorePlaylistsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (profileRequestInProgress || string.IsNullOrWhiteSpace(playlistsNextPageToken))
+            {
+                return;
+            }
+
+            profileRequestInProgress = true;
+            UpdateProfileControls();
+            try
+            {
+                DataPage<PlaylistSummary> page = await authenticatedClient.GetPlaylistsAsync(playlistsNextPageToken, 25);
+                foreach (PlaylistSummary playlist in page.Items)
+                {
+                    Playlists.Add(playlist);
+                }
+
+                playlistsNextPageToken = page.NextPageToken;
+                PlaylistsStatusText.Text = Playlists.Count + " playlists loaded. Select one to view its videos.";
+            }
+            catch (OAuthException exception)
+            {
+                PlaylistsStatusText.Text = exception.Message;
+            }
+            catch (YouTubeApiException exception)
+            {
+                PlaylistsStatusText.Text = GetProfileApiErrorMessage(exception);
+            }
+            catch (YouTubeApiResponseException exception)
+            {
+                PlaylistsStatusText.Text = exception.Message;
+            }
+            catch (TaskCanceledException)
+            {
+                PlaylistsStatusText.Text = "The playlists request timed out. Check the network connection and try again.";
+            }
+            catch (HttpRequestException)
+            {
+                PlaylistsStatusText.Text = "The playlists request could not be reached. Check the network connection.";
+            }
+            finally
+            {
+                profileRequestInProgress = false;
+                UpdateProfileControls();
+            }
+        }
+
+        private async void PlaylistButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            PlaylistSummary playlist = button == null ? null : button.Tag as PlaylistSummary;
+            if (playlist == null || profileRequestInProgress)
+            {
+                return;
+            }
+
+            selectedPlaylistId = playlist.Id;
+            SelectedPlaylistText.Text = playlist.Title;
+            PlaylistVideos.Clear();
+            playlistVideosNextPageToken = null;
+            await LoadPlaylistVideosAsync(null);
+        }
+
+        private async void MorePlaylistVideosButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(selectedPlaylistId))
+            {
+                await LoadPlaylistVideosAsync(playlistVideosNextPageToken);
+            }
+        }
+
+        private async Task LoadPlaylistVideosAsync(string pageToken)
+        {
+            if (profileRequestInProgress || string.IsNullOrWhiteSpace(selectedPlaylistId))
+            {
+                return;
+            }
+
+            profileRequestInProgress = true;
+            PlaylistVideosStatusText.Text = pageToken == null
+                ? "Loading playlist videos..."
+                : "Loading more playlist videos...";
+            UpdateProfileControls();
+            try
+            {
+                DataPage<VideoSummary> page = await authenticatedClient.GetPlaylistVideosAsync(
+                    selectedPlaylistId,
+                    pageToken,
+                    25);
+                foreach (VideoSummary video in page.Items)
+                {
+                    PlaylistVideos.Add(video);
+                }
+
+                playlistVideosNextPageToken = page.NextPageToken;
+                PlaylistVideosStatusText.Text = PlaylistVideos.Count + " playlist videos loaded.";
+            }
+            catch (OAuthException exception)
+            {
+                PlaylistVideosStatusText.Text = exception.Message;
+            }
+            catch (YouTubeApiException exception)
+            {
+                PlaylistVideosStatusText.Text = GetProfileApiErrorMessage(exception);
+            }
+            catch (YouTubeApiResponseException exception)
+            {
+                PlaylistVideosStatusText.Text = exception.Message;
+            }
+            catch (TaskCanceledException)
+            {
+                PlaylistVideosStatusText.Text = "The playlist videos request timed out. Check the network connection and try again.";
+            }
+            catch (HttpRequestException)
+            {
+                PlaylistVideosStatusText.Text = "The playlist videos request could not be reached. Check the network connection.";
+            }
+            finally
+            {
+                profileRequestInProgress = false;
+                UpdateProfileControls();
+            }
+        }
+
+        private async void LoadLikedVideosButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (profileRequestInProgress)
+            {
+                return;
+            }
+
+            LikedVideos.Clear();
+            likedVideosNextPageToken = null;
+            await LoadLikedVideosAsync(null);
+        }
+
+        private async void MoreLikedVideosButton_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadLikedVideosAsync(likedVideosNextPageToken);
+        }
+
+        private async Task LoadLikedVideosAsync(string pageToken)
+        {
+            if (profileRequestInProgress)
+            {
+                return;
+            }
+
+            profileRequestInProgress = true;
+            LikedVideosStatusText.Text = pageToken == null
+                ? "Loading liked videos..."
+                : "Loading more liked videos...";
+            UpdateProfileControls();
+            try
+            {
+                DataPage<VideoSummary> page = await authenticatedClient.GetLikedVideosAsync(pageToken, 25);
+                foreach (VideoSummary video in page.Items)
+                {
+                    LikedVideos.Add(video);
+                }
+
+                likedVideosNextPageToken = page.NextPageToken;
+                LikedVideosStatusText.Text = LikedVideos.Count == 0
+                    ? "No liked videos were returned."
+                    : LikedVideos.Count + " liked videos loaded.";
+            }
+            catch (OAuthException exception)
+            {
+                LikedVideosStatusText.Text = exception.Message;
+            }
+            catch (YouTubeApiException exception)
+            {
+                LikedVideosStatusText.Text = GetProfileApiErrorMessage(exception);
+            }
+            catch (YouTubeApiResponseException exception)
+            {
+                LikedVideosStatusText.Text = exception.Message;
+            }
+            catch (TaskCanceledException)
+            {
+                LikedVideosStatusText.Text = "The liked videos request timed out. Check the network connection and try again.";
+            }
+            catch (HttpRequestException)
+            {
+                LikedVideosStatusText.Text = "The liked videos request could not be reached. Check the network connection.";
+            }
+            finally
+            {
+                profileRequestInProgress = false;
+                UpdateProfileControls();
+            }
+        }
+
+        private void ProfileVideoButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            NavigateToVideo(button == null ? null : button.Tag as VideoSummary);
+        }
+
+        private void UpdateProfileControls()
+        {
+            if (MoreSubscriptionsButton == null)
+            {
+                return;
+            }
+
+            bool canLoad = !profileRequestInProgress;
+            RefreshProfileButton.IsEnabled = canLoad;
+            MoreSubscriptionsButton.IsEnabled = canLoad && !string.IsNullOrWhiteSpace(subscriptionsNextPageToken);
+            MorePlaylistsButton.IsEnabled = canLoad && !string.IsNullOrWhiteSpace(playlistsNextPageToken);
+            MorePlaylistVideosButton.IsEnabled = canLoad && !string.IsNullOrWhiteSpace(playlistVideosNextPageToken);
+            LoadLikedVideosButton.IsEnabled = canLoad && profileLoaded;
+            MoreLikedVideosButton.IsEnabled = canLoad && !string.IsNullOrWhiteSpace(likedVideosNextPageToken);
+        }
+
+        private static string GetProfileApiErrorMessage(YouTubeApiException exception)
+        {
+            if (exception.StatusCode == System.Net.HttpStatusCode.Forbidden
+                || exception.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                return "Google did not grant this account access to profile data. Sign out, start Google sign-in again, and accept the YouTube read-only scope.";
+            }
+
+            return exception.Message;
         }
 
         private async Task LoadCategoriesAsync()
@@ -276,7 +681,7 @@ namespace YouTube.Uwp
 
         private void UpdatePivotHeaders()
         {
-            if (HomePivotHeader == null || SearchPivotHeader == null || CategoriesPivotHeader == null)
+            if (HomePivotHeader == null || SearchPivotHeader == null || CategoriesPivotHeader == null || ProfilePivotHeader == null)
             {
                 return;
             }
@@ -284,6 +689,7 @@ namespace YouTube.Uwp
             HomePivotHeader.IsSelected = MainPivot.SelectedIndex == 0;
             SearchPivotHeader.IsSelected = MainPivot.SelectedIndex == 1;
             CategoriesPivotHeader.IsSelected = MainPivot.SelectedIndex == 2;
+            ProfilePivotHeader.IsSelected = MainPivot.SelectedIndex == 3;
         }
 
         private string GetRegionLabel()

@@ -100,25 +100,25 @@ namespace YouTube.Uwp.Views
         {
             if (OAuthDeviceAuthorizationService.HasStoredToken())
             {
-                AuthStatusText.Text = "A Google account is authorized for video uploads.";
+                AuthStatusText.Text = "A Google account is authorized for profile reads and video uploads. Sign in again if this token predates Profile.";
             }
             else if (App.Configuration.HasStoredOAuthDeviceCredentials)
             {
-                AuthStatusText.Text = "Saved OAuth credentials are configured. Start Google sign-in before uploading.";
+                AuthStatusText.Text = "Saved OAuth credentials are configured. Start Google sign-in before opening Profile or uploading.";
             }
             else if (App.Configuration.HasBuildDefaultOAuthDeviceCredentials)
             {
                 AuthStatusText.Text = App.Configuration.HasIncompleteStoredOAuthDeviceCredentials
-                    ? "An incomplete saved OAuth override was ignored. Using built-in YourTube configuration for uploads."
-                    : "Using built-in YourTube configuration for uploads. Start Google sign-in before uploading.";
+                    ? "An incomplete saved OAuth override was ignored. Using built-in YourTube configuration for Profile and uploads."
+                    : "Using built-in YourTube configuration for Profile and uploads. Start Google sign-in first.";
             }
             else if (App.Configuration.HasOAuthDeviceCredentials)
             {
-                AuthStatusText.Text = "Managed OAuth configuration is available. Start Google sign-in before uploading.";
+                AuthStatusText.Text = "Managed OAuth configuration is available. Start Google sign-in before opening Profile or uploading.";
             }
             else
             {
-                AuthStatusText.Text = "Save OAuth credentials, then start Google sign-in before uploading.";
+                AuthStatusText.Text = "Save OAuth credentials, then start Google sign-in before opening Profile or uploading.";
             }
 
             UpdateAuthorizationControls();
@@ -176,7 +176,7 @@ namespace YouTube.Uwp.Views
                             new Progress<DeviceAuthorizationProgress>(UpdateDeviceAuthorizationProgress),
                             authorizationCancellation.Token);
                         StopAuthorizationCountdown();
-                        AuthStatusText.Text = "Google authorization completed. You can now upload a selected video.";
+                        AuthStatusText.Text = "Google authorization completed. Profile reads and video uploads are available.";
                         DiagnosticLog.Write("OAuth.SignIn", "Device authorization completed and token persistence returned.");
                         break;
                     }
@@ -230,7 +230,7 @@ namespace YouTube.Uwp.Views
             OAuthDeviceAuthorizationService.ClearStoredToken();
             VerificationUrlText.Text = string.Empty;
             VerificationCodeText.Text = string.Empty;
-            AuthStatusText.Text = "Google authorization removed. Start Google sign-in before uploading.";
+            AuthStatusText.Text = "Google authorization removed. Start Google sign-in before opening Profile or uploading.";
             UpdateAuthorizationControls();
         }
 
