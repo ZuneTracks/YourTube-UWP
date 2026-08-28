@@ -41,10 +41,10 @@
                 <Border Background="{StaticResource PhoneSurfaceBrush}" Padding="14">
                     <StackPanel>
                         <TextBlock Text="google account" Style="{StaticResource PhoneSectionTitleStyle}" />
-                        <TextBlock Text="Upload uses a Google TVs and limited-input device OAuth client. No redirect URI is used. Managed local build values remain hidden; saving credentials here overrides them." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
+                        <TextBlock Text="Profile reads and upload use a Google TVs and limited-input device OAuth client. No redirect URI is used. Managed local build values remain hidden; saving credentials here overrides them." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,8" TextWrapping="Wrap" />
                         <TextBox x:Name="OAuthClientIdBox" Style="{StaticResource PhoneTextBoxStyle}" Header="Limited-input device OAuth client ID override" PlaceholderText="Leave blank to use managed configuration" />
                         <PasswordBox x:Name="OAuthClientSecretBox" Style="{StaticResource PhonePasswordBoxStyle}" Header="Limited-input device OAuth client secret override" PlaceholderText="Leave blank to use managed configuration" />
-                        <TextBlock Text="Save credentials, then start Google sign-in. The verification code below is entered on another device; this app never opens a sign-in form." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,8" TextWrapping="Wrap" />
+                        <TextBlock Text="Save credentials, then start Google sign-in. The verification code below is entered on another device; this app never opens a sign-in form. Sign in again after this update to grant profile read access." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,8" TextWrapping="Wrap" />
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />

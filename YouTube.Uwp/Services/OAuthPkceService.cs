@@ -10,6 +10,8 @@ namespace YouTube.Uwp.Services
     public sealed class OAuthDeviceAuthorizationService
     {
         public const string YouTubeUploadScope = "https://www.googleapis.com/auth/youtube.upload";
+        public const string YouTubeReadonlyScope = "https://www.googleapis.com/auth/youtube.readonly";
+        public const string YouTubeDeviceAuthorizationScope = YouTubeUploadScope + " " + YouTubeReadonlyScope;
         private const string DeviceAuthorizationEndpoint = "https://oauth2.googleapis.com/device/code";
         private const string TokenEndpoint = "https://oauth2.googleapis.com/token";
         private const string TokenAccessResource = "YourTube.OAuthToken.Access";
@@ -69,7 +71,7 @@ namespace YouTube.Uwp.Services
             DiagnosticLog.Write("OAuth.DeviceCode", "Requesting device authorization code.");
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("client_id", credentials.ClientId);
-            parameters.Add("scope", YouTubeUploadScope);
+            parameters.Add("scope", YouTubeDeviceAuthorizationScope);
 
             using (HttpResponseMessage response = await httpClient.SendAsync(
                 new HttpRequestMessage(HttpMethod.Post, DeviceAuthorizationEndpoint)

@@ -61,6 +61,29 @@
                 </StackPanel>
             </Border>
         </DataTemplate>
+        <DataTemplate x:Key="SubscriptionTemplate">
+            <Border Background="{StaticResource PhoneCardBrush}" Padding="12" Margin="0,0,0,8">
+                <StackPanel>
+                    <TextBlock Text="{Binding ChannelTitle}" Style="{StaticResource PhoneCardTitleStyle}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Description}" Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,0" TextWrapping="Wrap" MaxLines="2" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="PlaylistTemplate">
+            <Button Background="Transparent" BorderThickness="0" Padding="0" Margin="0,0,0,8" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="PlaylistButton_Click" Tag="{Binding}">
+                <Border Background="{StaticResource PhoneCardBrush}" Padding="12">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Title}" Style="{StaticResource PhoneCardTitleStyle}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding VideoCountLabel}" Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+            </Button>
+        </DataTemplate>
+        <DataTemplate x:Key="ProfileVideoTemplate">
+            <Button Background="Transparent" BorderThickness="0" Padding="0" Margin="0,0,0,10" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="ProfileVideoButton_Click" Tag="{Binding}">
+                <ContentControl Content="{Binding}" ContentTemplate="{StaticResource VideoCardTemplate}" />
+            </Button>
+        </DataTemplate>
     </Page.Resources>
 
     <Grid Background="{StaticResource PhonePageBrush}">
@@ -111,11 +134,6 @@
                             </Grid>
                         </Button>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                            <Button Content="SEARCH" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowSearchButton_Click" />
-                            <Button Content="UPLOAD VIDEO" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowUploadButton_Click" />
-                        </StackPanel>
-
                         <TextBlock Text="popular videos" Style="{StaticResource PhoneSectionTitleStyle}" />
                         <TextBlock x:Name="HomeStatusText" Style="{StaticResource PhoneMetadataStyle}" Text="Choose Trending Now to load public results." Margin="0,3,0,12" TextWrapping="Wrap" />
                         <ListView ItemsSource="{Binding Results}" ItemTemplate="{StaticResource VideoCardTemplate}" ItemContainerStyle="{StaticResource PhoneListItemStyle}" IsItemClickEnabled="True" ItemClick="ResultsList_ItemClick" SelectionMode="None" />
@@ -154,6 +172,135 @@
                         <TextBlock Text="Tap a category to expand its current popular videos. Tap it again to collapse and choose another." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,16" TextWrapping="Wrap" />
                         <TextBlock x:Name="CategoryStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,0,0,12" TextWrapping="Wrap" />
                         <ItemsControl ItemsSource="{Binding Categories}" ItemTemplate="{StaticResource CategoryTemplate}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+
+            <PivotItem>
+                <PivotItem.Header>
+                    <models:PivotHeader x:Name="ProfilePivotHeader" Label="PROFILE" Width="78" />
+                </PivotItem.Header>
+                <ScrollViewer>
+                    <StackPanel Margin="16,18,16,28">
+                        <TextBlock Text="profile" Style="{StaticResource PhonePageTitleStyle}" />
+                        <TextBlock Text="Account data available through your authenticated YouTube connection." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,12" TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="RefreshProfileButton" Content="REFRESH PROFILE" Style="{StaticResource PhoneActionButtonStyle}" Click="RefreshProfileButton_Click" />
+                            <Button Content="UPLOAD VIDEO" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowUploadButton_Click" />
+                        </StackPanel>
+                        <TextBlock x:Name="ProfileStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,14" TextWrapping="Wrap" />
+
+                        <Border Background="{StaticResource PhoneCardBrush}" Padding="12" Margin="0,0,0,14">
+                            <StackPanel>
+                                <TextBlock x:Name="ProfileTitleText" Style="{StaticResource PhoneSectionTitleStyle}" TextWrapping="Wrap" />
+                                <TextBlock x:Name="ProfileMetadataText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                <TextBlock x:Name="ProfileDescriptionText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,6,0,0" TextWrapping="Wrap" MaxLines="5" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{StaticResource PhoneCardBrush}" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Button Background="Transparent" BorderThickness="0" Padding="0" Click="ToggleUploadedVideosButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                    <Grid Height="52" Margin="12,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="uploaded videos" Style="{StaticResource PhoneSectionTitleStyle}" VerticalAlignment="Center" />
+                                        <TextBlock x:Name="UploadedVideosToggleGlyph" Grid.Column="1" Text="+" FontSize="28" Foreground="{StaticResource PhoneAccentBrush}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Button>
+                                <StackPanel x:Name="UploadedVideosContentPanel" Margin="12,0,12,12" Visibility="Collapsed">
+                                    <TextBlock x:Name="UploadedVideosStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,3,0,8" TextWrapping="Wrap" />
+                                    <ItemsControl ItemsSource="{Binding UploadedVideos}" ItemTemplate="{StaticResource ProfileVideoTemplate}" />
+                                    <Button x:Name="MoreUploadedVideosButton" Content="LOAD MORE UPLOADED VIDEOS" Style="{StaticResource PhoneOutlineButtonStyle}" Click="MoreUploadedVideosButton_Click" HorizontalAlignment="Left" IsEnabled="False" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{StaticResource PhoneCardBrush}" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Button Background="Transparent" BorderThickness="0" Padding="0" Click="ToggleSubscriptionsButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                    <Grid Height="52" Margin="12,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="subscriptions" Style="{StaticResource PhoneSectionTitleStyle}" VerticalAlignment="Center" />
+                                        <TextBlock x:Name="SubscriptionsToggleGlyph" Grid.Column="1" Text="+" FontSize="28" Foreground="{StaticResource PhoneAccentBrush}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Button>
+                                <StackPanel x:Name="SubscriptionsContentPanel" Margin="12,0,12,12" Visibility="Collapsed">
+                                    <TextBlock x:Name="SubscriptionsStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,3,0,8" TextWrapping="Wrap" />
+                                    <ListView x:Name="SubscriptionsList" ItemsSource="{Binding Subscriptions}" ItemTemplate="{StaticResource SubscriptionTemplate}" SelectionMode="None" />
+                                    <Button x:Name="MoreSubscriptionsButton" Content="LOAD MORE SUBSCRIPTIONS" Style="{StaticResource PhoneOutlineButtonStyle}" Click="MoreSubscriptionsButton_Click" HorizontalAlignment="Left" IsEnabled="False" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{StaticResource PhoneCardBrush}" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Button Background="Transparent" BorderThickness="0" Padding="0" Click="TogglePlaylistsButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                    <Grid Height="52" Margin="12,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="playlists" Style="{StaticResource PhoneSectionTitleStyle}" VerticalAlignment="Center" />
+                                        <TextBlock x:Name="PlaylistsToggleGlyph" Grid.Column="1" Text="+" FontSize="28" Foreground="{StaticResource PhoneAccentBrush}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Button>
+                                <StackPanel x:Name="PlaylistsContentPanel" Margin="12,0,12,12" Visibility="Collapsed">
+                                    <TextBlock x:Name="PlaylistsStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,3,0,8" TextWrapping="Wrap" />
+                                    <ItemsControl ItemsSource="{Binding Playlists}" ItemTemplate="{StaticResource PlaylistTemplate}" />
+                                    <Button x:Name="MorePlaylistsButton" Content="LOAD MORE PLAYLISTS" Style="{StaticResource PhoneOutlineButtonStyle}" Click="MorePlaylistsButton_Click" HorizontalAlignment="Left" IsEnabled="False" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{StaticResource PhoneCardBrush}" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Button Background="Transparent" BorderThickness="0" Padding="0" Click="TogglePlaylistVideosButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                    <Grid Height="52" Margin="12,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="SelectedPlaylistText" Text="playlist videos" Style="{StaticResource PhoneSectionTitleStyle}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="PlaylistVideosToggleGlyph" Grid.Column="1" Text="+" FontSize="28" Foreground="{StaticResource PhoneAccentBrush}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Button>
+                                <StackPanel x:Name="PlaylistVideosContentPanel" Margin="12,0,12,12" Visibility="Collapsed">
+                                    <TextBlock x:Name="PlaylistVideosStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,3,0,8" TextWrapping="Wrap" />
+                                    <ItemsControl ItemsSource="{Binding PlaylistVideos}" ItemTemplate="{StaticResource ProfileVideoTemplate}" />
+                                    <Button x:Name="MorePlaylistVideosButton" Content="LOAD MORE PLAYLIST VIDEOS" Style="{StaticResource PhoneOutlineButtonStyle}" Click="MorePlaylistVideosButton_Click" HorizontalAlignment="Left" IsEnabled="False" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{StaticResource PhoneCardBrush}" Margin="0,0,0,8">
+                            <StackPanel>
+                                <Button Background="Transparent" BorderThickness="0" Padding="0" Click="ToggleLikedVideosButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                    <Grid Height="52" Margin="12,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="liked videos" Style="{StaticResource PhoneSectionTitleStyle}" VerticalAlignment="Center" />
+                                        <TextBlock x:Name="LikedVideosToggleGlyph" Grid.Column="1" Text="+" FontSize="28" Foreground="{StaticResource PhoneAccentBrush}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Button>
+                                <StackPanel x:Name="LikedVideosContentPanel" Margin="12,0,12,12" Visibility="Collapsed">
+                                    <TextBlock x:Name="LikedVideosStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,3,0,8" TextWrapping="Wrap" />
+                                    <Button x:Name="LoadLikedVideosButton" Content="LOAD LIKED VIDEOS" Style="{StaticResource PhoneOutlineButtonStyle}" Click="LoadLikedVideosButton_Click" HorizontalAlignment="Left" />
+                                    <ItemsControl ItemsSource="{Binding LikedVideos}" ItemTemplate="{StaticResource ProfileVideoTemplate}" />
+                                    <Button x:Name="MoreLikedVideosButton" Content="LOAD MORE LIKED VIDEOS" Style="{StaticResource PhoneOutlineButtonStyle}" Click="MoreLikedVideosButton_Click" HorizontalAlignment="Left" IsEnabled="False" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="unsupported by YouTube Data API v3" Style="{StaticResource PhoneSectionTitleStyle}" Margin="0,14,0,0" />
+                        <TextBlock Text="Watch History and Watch Later are not exposed as readable v3 collections. YourTube does not emulate or mislabel them." Style="{StaticResource PhoneMetadataStyle}" Margin="0,3,0,0" TextWrapping="Wrap" />
                     </StackPanel>
                 </ScrollViewer>
             </PivotItem>

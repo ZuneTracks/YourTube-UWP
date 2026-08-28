@@ -6,9 +6,9 @@ folders and are not referenced by the UWP project. Only the existing image files
 are linked as package assets; no recovered application code, token handling, stream
 handling, or binary libraries are reused.
 
-## Current release: v1.6.0.0
+## Current release: v1.6.5.0
 
-v1.6.0.0 is the current YourTube UWP release. It adds a foreground YouTube
+v1.6.5.0 is the current YourTube UWP release. It adds a foreground YouTube
 video-upload prototype with Google limited-input-device authorization, resumable
 transfers, cancellation, determinate progress, and persistent redacted
 diagnostics. It also restores the Settings **About** flyout from the recovered
@@ -48,7 +48,7 @@ Windows App SDK dependency, so every app API used is available on 15063.
 
 The UWP UI intentionally echoes the recovered Windows Phone application without
 reusing its unsupported Silverlight controls: a dark header, red accent strip,
-pivot-style **Home**, **Search**, and **Categories** sections, an active-pivot
+pivot-style **Home**, **Search**, **Categories**, and **Profile** sections, an active-pivot
 underline, large thumbnail cards, and compact metadata/detail pages. The header's
 **Settings** button opens the separate credentials page. It uses only UWP XAML
 controls supported by Windows 10 Mobile 15063.
@@ -85,7 +85,7 @@ revoke or rotate them in their original provider consoles.
 
 ### Local Visual Studio 2017 build defaults
 
-This support is included in `v1.6.0.0`. Work from an up-to-date `main`
+This support is included in `v1.6.5.0`. Work from an up-to-date `main`
 checkout, not an older source archive or a generated deployment ZIP. In Visual
 Studio 2017, expand **YourTube > Services** and open
 `LocalBuildConfiguration.cs.template`. If it is not visible, select **Show All Files**
@@ -125,7 +125,7 @@ its default local AppX output is unsigned. To deploy with the Visual Studio debu
 `LocalPackageSigning.props` is ignored by Git. If `DEP0001` reports
 `0x80070490` (**Element not found**), remove an older developer/sideload
 installation of YourTube from the phone, restart it, confirm both ARM framework
-dependencies are installed, and deploy again. The source package version is `1.6.0.0`;
+dependencies are installed, and deploy again. The source package version is `1.6.5.0`;
 it must be newer than any installed YourTube package. The published release deployment
 ZIP installs its matching certificate and dependencies automatically.
 
@@ -150,6 +150,25 @@ The public client maps results into platform-independent `VideoSummary`,
 that inherit WP8 `ResultItem`, dispatch through WP8 view-model singletons, and
 contain platform-specific commands and transfer objects.
 
+### Authenticated Profile pivot
+
+After device authorization, the Profile pivot reads only data exposed by the
+authenticated YouTube Data API v3 connection:
+
+| Profile data | Official YouTube Data API v3 request |
+| --- | --- |
+| Authorized channel/account summary | `channels.list?part=snippet,contentDetails,statistics&mine=true` |
+| Uploaded videos | `playlistItems.list?part=snippet,contentDetails&playlistId={channel.uploads}` |
+| Subscriptions | `subscriptions.list?part=snippet,contentDetails&mine=true` |
+| Playlists | `playlists.list?part=snippet,contentDetails&mine=true` |
+| Playlist videos | `playlistItems.list?part=snippet,contentDetails&playlistId=...` |
+| Liked videos | `videos.list?part=snippet,contentDetails,statistics,status&myRating=like` |
+
+Collections load in pages of up to 25 items and expose a load-more action when
+the API returns a next-page token. Watch History and Watch Later are explicitly
+unsupported: YouTube Data API v3 does not expose either as a readable
+collection, so the app does not pretend to provide them.
+
 ### Trending live tile
 
 After a successful **Trending Now** request, YourTube persists the leading public
@@ -167,7 +186,8 @@ API key or on the retired WP8 scheduled agent.
 ## Account authorization architecture
 
 `OAuthDeviceAuthorizationService` uses Google OAuth 2.0 device authorization with
-the `https://www.googleapis.com/auth/youtube.upload` scope:
+the `https://www.googleapis.com/auth/youtube.upload` and
+`https://www.googleapis.com/auth/youtube.readonly` scopes:
 
 1. It obtains a short-lived device code and displays Google's verification URI and
    user code. The user completes authorization in a browser on another device; the
@@ -182,12 +202,20 @@ the `https://www.googleapis.com/auth/youtube.upload` scope:
    entries, avoiding mobile vault value-size limits. `GetValidAccessTokenAsync`
    refreshes an expiring access token without adding an API key.
 
+The Profile pivot uses the read-only scope to request the authorized channel,
+subscriptions, playlists, playlist videos, and liked videos. The upload scope is
+retained for the existing uploader. Tokens issued before the Profile pivot do
+not gain the new scope automatically; sign out and complete device sign-in again
+if Profile reports an authorization or insufficient-permission error.
+
 The **Upload** page uses a brokered UWP file picker, sends `snippet` and `status`
 metadata to `videos.insert`, and uploads the selected file in 256 KiB resumable
 chunks. It reports determinate byte progress and permits cancellation between
 chunks. The uploader requires completed OAuth authorization and never uses the
-public API key. Other account features must explicitly request the minimum OAuth
-scope and use a bearer access token. Examples include:
+public API key. The Profile pivot uses `youtube.readonly` for the authorized
+channel, subscriptions, playlists, playlist videos, and liked videos. Other
+account features must explicitly request the minimum OAuth scope and use a bearer
+access token. Examples include:
 
 ### Uploading a test video
 
