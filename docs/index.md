@@ -30,7 +30,8 @@ tokens, or media URLs.
 
 ## Legal
 
-Use of the App is governed by the [Terms of Service](terms-of-service.md).
+Use of the App is governed by the [Terms of Service](terms-of-service.md) and
+[Privacy Policy](privacy-policy.md).
 
 ## Installing
 

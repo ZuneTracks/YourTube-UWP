@@ -6,7 +6,7 @@ folders and are not referenced by the UWP project. Only the existing image files
 are linked as package assets; no recovered application code, token handling, stream
 handling, or binary libraries are reused.
 
-[Terms of Service](docs/terms-of-service.md)
+[Terms of Service](docs/terms-of-service.md) | [Privacy Policy](docs/privacy-policy.md)
 
 ## Current release: v1.6.5.0
 
