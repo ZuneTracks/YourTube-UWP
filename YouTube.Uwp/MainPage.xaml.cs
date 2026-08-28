@@ -216,7 +216,7 @@ namespace YouTube.Uwp
             ProfileTitleText.Text = string.Empty;
             ProfileMetadataText.Text = string.Empty;
             ProfileDescriptionText.Text = string.Empty;
-            SelectedPlaylistText.Text = string.Empty;
+            SelectedPlaylistText.Text = "playlist videos";
             ProfileStatusText.Text = "Loading authenticated profile...";
             SubscriptionsStatusText.Text = string.Empty;
             PlaylistsStatusText.Text = string.Empty;

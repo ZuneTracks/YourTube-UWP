@@ -20,6 +20,8 @@
 - Made Uploaded Videos, Subscriptions, Playlists, Playlist Videos, and Liked
   Videos collapsible while keeping Account Summary and unsupported-data guidance
   exposed.
+- Collapsed those five data sections by default and kept the Playlist Videos
+  heading visible before a playlist is selected.
 
 ## v1.6.0.0 - ARM uploader release
 
