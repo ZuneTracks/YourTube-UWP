@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased - User Profile pivot prototype
+## v1.6.5.0 - User Profile release
 
 - Added an authenticated **Profile** pivot with the authorized channel summary,
   subscriptions, playlists, playlist-video browsing, and liked-video reads.

@@ -6,9 +6,9 @@ folders and are not referenced by the UWP project. Only the existing image files
 are linked as package assets; no recovered application code, token handling, stream
 handling, or binary libraries are reused.
 
-## Current release: v1.6.0.0
+## Current release: v1.6.5.0
 
-v1.6.0.0 is the current YourTube UWP release. It adds a foreground YouTube
+v1.6.5.0 is the current YourTube UWP release. It adds a foreground YouTube
 video-upload prototype with Google limited-input-device authorization, resumable
 transfers, cancellation, determinate progress, and persistent redacted
 diagnostics. It also restores the Settings **About** flyout from the recovered
@@ -85,7 +85,7 @@ revoke or rotate them in their original provider consoles.
 
 ### Local Visual Studio 2017 build defaults
 
-This support is included in `v1.6.0.0`. Work from an up-to-date `main`
+This support is included in `v1.6.5.0`. Work from an up-to-date `main`
 checkout, not an older source archive or a generated deployment ZIP. In Visual
 Studio 2017, expand **YourTube > Services** and open
 `LocalBuildConfiguration.cs.template`. If it is not visible, select **Show All Files**
@@ -125,7 +125,7 @@ its default local AppX output is unsigned. To deploy with the Visual Studio debu
 `LocalPackageSigning.props` is ignored by Git. If `DEP0001` reports
 `0x80070490` (**Element not found**), remove an older developer/sideload
 installation of YourTube from the phone, restart it, confirm both ARM framework
-dependencies are installed, and deploy again. The source package version is `1.6.0.0`;
+dependencies are installed, and deploy again. The source package version is `1.6.5.0`;
 it must be newer than any installed YourTube package. The published release deployment
 ZIP installs its matching certificate and dependencies automatically.
 
