@@ -6,6 +6,8 @@ folders and are not referenced by the UWP project. Only the existing image files
 are linked as package assets; no recovered application code, token handling, stream
 handling, or binary libraries are reused.
 
+[Terms of Service](docs/terms-of-service.md)
+
 ## Current release: v1.6.5.0
 
 v1.6.5.0 is the current YourTube UWP release. It adds a foreground YouTube
