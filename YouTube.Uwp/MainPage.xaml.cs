@@ -24,6 +24,7 @@ namespace YouTube.Uwp
         private string playlistVideosNextPageToken;
         private string likedVideosNextPageToken;
         private string selectedPlaylistId;
+        private string profileLoadStage;
 
         public MainPage()
         {
@@ -174,7 +175,14 @@ namespace YouTube.Uwp
 
             if (MainPivot.SelectedIndex == 3 && !profileLoaded)
             {
-                await LoadProfileAsync();
+                try
+                {
+                    await LoadProfileAsync();
+                }
+                catch (Exception exception)
+                {
+                    ShowProfileFailure("pivot", exception, ProfileStatusText);
+                }
             }
         }
 
@@ -192,6 +200,7 @@ namespace YouTube.Uwp
 
             profileRequestInProgress = true;
             profileLoaded = false;
+            profileLoadStage = "starting";
             subscriptionsNextPageToken = null;
             playlistsNextPageToken = null;
             playlistVideosNextPageToken = null;
@@ -214,6 +223,7 @@ namespace YouTube.Uwp
 
             try
             {
+                profileLoadStage = "channel";
                 ChannelDetails channel = await authenticatedClient.GetMyChannelAsync();
                 if (channel == null)
                 {
@@ -230,6 +240,7 @@ namespace YouTube.Uwp
                     + " views";
                 ProfileDescriptionText.Text = channel.Description;
 
+                profileLoadStage = "subscriptions";
                 DataPage<SubscriptionSummary> subscriptions = await authenticatedClient.GetSubscriptionsAsync(null, 25);
                 foreach (SubscriptionSummary subscription in subscriptions.Items)
                 {
@@ -239,6 +250,7 @@ namespace YouTube.Uwp
                 subscriptionsNextPageToken = subscriptions.NextPageToken;
                 SubscriptionsStatusText.Text = Subscriptions.Count + " subscriptions loaded.";
 
+                profileLoadStage = "playlists";
                 DataPage<PlaylistSummary> playlists = await authenticatedClient.GetPlaylistsAsync(null, 25);
                 foreach (PlaylistSummary playlist in playlists.Items)
                 {
@@ -276,6 +288,10 @@ namespace YouTube.Uwp
             {
                 ProfileStatusText.Text = "The authenticated YouTube API could not be reached. Check the network connection.";
             }
+            catch (Exception exception)
+            {
+                ShowProfileFailure(profileLoadStage, exception, ProfileStatusText);
+            }
             finally
             {
                 profileRequestInProgress = false;
@@ -294,6 +310,7 @@ namespace YouTube.Uwp
             UpdateProfileControls();
             try
             {
+                profileLoadStage = "subscriptions";
                 DataPage<SubscriptionSummary> page = await authenticatedClient.GetSubscriptionsAsync(subscriptionsNextPageToken, 25);
                 foreach (SubscriptionSummary subscription in page.Items)
                 {
@@ -323,6 +340,10 @@ namespace YouTube.Uwp
             {
                 SubscriptionsStatusText.Text = "The subscriptions request could not be reached. Check the network connection.";
             }
+            catch (Exception exception)
+            {
+                ShowProfileFailure(profileLoadStage, exception, SubscriptionsStatusText);
+            }
             finally
             {
                 profileRequestInProgress = false;
@@ -341,6 +362,7 @@ namespace YouTube.Uwp
             UpdateProfileControls();
             try
             {
+                profileLoadStage = "playlists";
                 DataPage<PlaylistSummary> page = await authenticatedClient.GetPlaylistsAsync(playlistsNextPageToken, 25);
                 foreach (PlaylistSummary playlist in page.Items)
                 {
@@ -369,6 +391,10 @@ namespace YouTube.Uwp
             catch (HttpRequestException)
             {
                 PlaylistsStatusText.Text = "The playlists request could not be reached. Check the network connection.";
+            }
+            catch (Exception exception)
+            {
+                ShowProfileFailure(profileLoadStage, exception, PlaylistsStatusText);
             }
             finally
             {
@@ -415,6 +441,7 @@ namespace YouTube.Uwp
             UpdateProfileControls();
             try
             {
+                profileLoadStage = "playlist videos";
                 DataPage<VideoSummary> page = await authenticatedClient.GetPlaylistVideosAsync(
                     selectedPlaylistId,
                     pageToken,
@@ -446,6 +473,10 @@ namespace YouTube.Uwp
             catch (HttpRequestException)
             {
                 PlaylistVideosStatusText.Text = "The playlist videos request could not be reached. Check the network connection.";
+            }
+            catch (Exception exception)
+            {
+                ShowProfileFailure(profileLoadStage, exception, PlaylistVideosStatusText);
             }
             finally
             {
@@ -485,6 +516,7 @@ namespace YouTube.Uwp
             UpdateProfileControls();
             try
             {
+                profileLoadStage = "liked videos";
                 DataPage<VideoSummary> page = await authenticatedClient.GetLikedVideosAsync(pageToken, 25);
                 foreach (VideoSummary video in page.Items)
                 {
@@ -515,6 +547,10 @@ namespace YouTube.Uwp
             catch (HttpRequestException)
             {
                 LikedVideosStatusText.Text = "The liked videos request could not be reached. Check the network connection.";
+            }
+            catch (Exception exception)
+            {
+                ShowProfileFailure(profileLoadStage, exception, LikedVideosStatusText);
             }
             finally
             {
@@ -554,6 +590,15 @@ namespace YouTube.Uwp
             }
 
             return exception.Message;
+        }
+
+        private static void ShowProfileFailure(string stage, Exception exception, TextBlock statusText)
+        {
+            string safeStage = string.IsNullOrWhiteSpace(stage) ? "unknown" : stage;
+            DiagnosticLog.WriteException("Profile." + safeStage, exception);
+            statusText.Text = "Profile could not load during " + safeStage + " (0x"
+                + exception.HResult.ToString("X8")
+                + "). Open Diagnostics for details.";
         }
 
         private async Task LoadCategoriesAsync()

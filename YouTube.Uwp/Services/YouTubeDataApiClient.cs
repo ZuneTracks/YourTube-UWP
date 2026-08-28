@@ -522,8 +522,22 @@ namespace YouTube.Uwp.Services
 
         private static ulong GetUnsignedNumber(JsonObject source, string name)
         {
+            JsonValue value = source.GetNamedValue(name, null);
+            if (value == null || value.ValueType == JsonValueType.Null)
+            {
+                return 0;
+            }
+
+            if (value.ValueType == JsonValueType.Number)
+            {
+                return value.GetNumber() < 0
+                    ? 0
+                    : (ulong)value.GetNumber();
+            }
+
             ulong result;
-            return ulong.TryParse(source.GetNamedString(name, "0"), NumberStyles.None, CultureInfo.InvariantCulture, out result)
+            return value.ValueType == JsonValueType.String
+                && ulong.TryParse(value.GetString(), NumberStyles.None, CultureInfo.InvariantCulture, out result)
                 ? result
                 : 0;
         }

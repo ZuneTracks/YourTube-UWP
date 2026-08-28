@@ -10,6 +10,9 @@
 - Device authorization now requests the existing `youtube.upload` scope plus the
   minimum `youtube.readonly` scope required for account reads. Existing tokens
   must be authorized again after this change.
+- Hardened profile loading against unexpected API value types and surfaced
+  stage-specific errors in the pivot instead of allowing an async UI exception
+  to terminate the app.
 
 ## v1.6.0.0 - ARM uploader release
 
