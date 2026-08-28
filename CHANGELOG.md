@@ -17,6 +17,9 @@
   removed the redundant Home pivot Search action.
 - Added the authorized channel's uploaded videos through its YouTube-provided
   uploads playlist, including paginated loading.
+- Made Uploaded Videos, Subscriptions, Playlists, Playlist Videos, and Liked
+  Videos collapsible while keeping Account Summary and unsupported-data guidance
+  exposed.
 
 ## v1.6.0.0 - ARM uploader release
 

@@ -647,6 +647,38 @@ namespace YouTube.Uwp
             NavigateToVideo(button == null ? null : button.Tag as VideoSummary);
         }
 
+        private void ToggleUploadedVideosButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleProfileSection(UploadedVideosContentPanel, UploadedVideosToggleGlyph);
+        }
+
+        private void ToggleSubscriptionsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleProfileSection(SubscriptionsContentPanel, SubscriptionsToggleGlyph);
+        }
+
+        private void TogglePlaylistsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleProfileSection(PlaylistsContentPanel, PlaylistsToggleGlyph);
+        }
+
+        private void TogglePlaylistVideosButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleProfileSection(PlaylistVideosContentPanel, PlaylistVideosToggleGlyph);
+        }
+
+        private void ToggleLikedVideosButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleProfileSection(LikedVideosContentPanel, LikedVideosToggleGlyph);
+        }
+
+        private static void ToggleProfileSection(FrameworkElement content, TextBlock glyph)
+        {
+            bool expanded = content.Visibility == Visibility.Visible;
+            content.Visibility = expanded ? Visibility.Collapsed : Visibility.Visible;
+            glyph.Text = expanded ? "+" : "-";
+        }
+
         private void UpdateProfileControls()
         {
             if (MoreSubscriptionsButton == null)
