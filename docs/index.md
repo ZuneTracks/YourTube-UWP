@@ -8,13 +8,14 @@ YourTube is an original UWP client for Windows 10 Mobile 10.0.15063 (Creators
 Update) and later. It is designed for ARM devices and uses the official YouTube
 Data API v3 for public discovery features.
 
-## Latest release: v1.5.0.0
+## Latest release: v1.6.0.0
 
-[Download the ARM Developer Mode sideload package](https://github.com/ZuneTracks/YourTube-UWP/releases/tag/v1.5.0.0)
+[Download the ARM Developer Mode sideload package](https://github.com/ZuneTracks/YourTube-UWP/releases/tag/v1.6.0.0)
 
-The `v1.5.0.0` release adds a foreground video-upload prototype with Google
+The `v1.6.0.0` release adds a foreground video-upload prototype with Google
 limited-input-device authorization, resumable uploads, cancellation,
-determinate progress, and persistent redacted diagnostics. It retains the
+determinate progress, persistent redacted diagnostics, and atomic OAuth
+credential-pair selection. It retains the
 live-tile refresh fix and rotating behavior for the latest video metadata:
 
 - The last video selected for playback.

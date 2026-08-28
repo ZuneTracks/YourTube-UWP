@@ -1,7 +1,7 @@
 # Microsoft Store readiness
 
 The authoritative `YouTube.Uwp.sln` source is prepared as package version
-`1.5.0.0`.
+`1.6.0.0`.
 
 ## Current status
 

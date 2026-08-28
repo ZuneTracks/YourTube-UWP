@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.6.0.0 - ARM uploader release
+
+- Published the current uploader, device authorization, and local developer
+  deployment updates as an ARM Developer Mode sideload release.
+- Uses an atomic OAuth credential pair: a complete saved pair takes precedence,
+  otherwise a complete local build-default pair is used. Incomplete saved values
+  cannot be combined with embedded defaults.
+- Added secret-safe OAuth diagnostics that identify only the active configuration
+  source and credential lengths.
+
 ## v1.5.1.0 - Device authorization and developer deployment
 
 - Added a live device-code countdown, server-timed polling status, visible
