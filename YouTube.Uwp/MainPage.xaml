@@ -134,11 +134,6 @@
                             </Grid>
                         </Button>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                            <Button Content="SEARCH" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowSearchButton_Click" />
-                            <Button Content="UPLOAD VIDEO" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowUploadButton_Click" />
-                        </StackPanel>
-
                         <TextBlock Text="popular videos" Style="{StaticResource PhoneSectionTitleStyle}" />
                         <TextBlock x:Name="HomeStatusText" Style="{StaticResource PhoneMetadataStyle}" Text="Choose Trending Now to load public results." Margin="0,3,0,12" TextWrapping="Wrap" />
                         <ListView ItemsSource="{Binding Results}" ItemTemplate="{StaticResource VideoCardTemplate}" ItemContainerStyle="{StaticResource PhoneListItemStyle}" IsItemClickEnabled="True" ItemClick="ResultsList_ItemClick" SelectionMode="None" />
@@ -189,7 +184,10 @@
                     <StackPanel Margin="16,18,16,28">
                         <TextBlock Text="profile" Style="{StaticResource PhonePageTitleStyle}" />
                         <TextBlock Text="Account data available through your authenticated YouTube connection." Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,12" TextWrapping="Wrap" />
-                        <Button x:Name="RefreshProfileButton" Content="REFRESH PROFILE" Style="{StaticResource PhoneActionButtonStyle}" Click="RefreshProfileButton_Click" HorizontalAlignment="Left" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="RefreshProfileButton" Content="REFRESH PROFILE" Style="{StaticResource PhoneActionButtonStyle}" Click="RefreshProfileButton_Click" />
+                            <Button Content="UPLOAD VIDEO" Style="{StaticResource PhoneOutlineButtonStyle}" Click="ShowUploadButton_Click" />
+                        </StackPanel>
                         <TextBlock x:Name="ProfileStatusText" Style="{StaticResource PhoneMetadataStyle}" Margin="0,2,0,14" TextWrapping="Wrap" />
 
                         <Border Background="{StaticResource PhoneCardBrush}" Padding="12" Margin="0,0,0,14">

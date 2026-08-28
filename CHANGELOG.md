@@ -13,6 +13,8 @@
 - Hardened profile loading against unexpected API value types and surfaced
   stage-specific errors in the pivot instead of allowing an async UI exception
   to terminate the app.
+- Moved the Upload Video action into the Profile pivot beside Refresh Profile and
+  removed the redundant Home pivot Search action.
 
 ## v1.6.0.0 - ARM uploader release
 

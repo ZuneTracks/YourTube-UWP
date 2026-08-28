@@ -150,11 +150,6 @@ namespace YouTube.Uwp
             }
         }
 
-        private void ShowSearchButton_Click(object sender, RoutedEventArgs e)
-        {
-            MainPivot.SelectedIndex = 1;
-        }
-
         private void ShowSettingsButton_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(SettingsPage));
