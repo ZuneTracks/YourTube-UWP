@@ -1,17 +1,17 @@
 ---
-title: YourTube UWP Privacy Policy
+title: UniTube UWP Privacy Policy
 ---
 
-# YourTube UWP Privacy Policy
+# UniTube UWP Privacy Policy
 
 **Effective date: August 28, 2026**
 
-This Privacy Policy explains how the YourTube UWP application ("YourTube" or the
+This Privacy Policy explains how the UniTube UWP application ("UniTube" or the
 "App") handles information when you use it.
 
 ## Overview
 
-YourTube is an independent, open-source UWP client. The project does not operate
+UniTube is an independent, open-source UWP client. The project does not operate
 an account system, its own backend service, advertising service, or analytics
 service. The App does not sell personal information.
 
@@ -119,4 +119,4 @@ this page. The effective date identifies when the policy was last updated.
 ## Contact
 
 For questions about this policy, open an issue in the
-[YourTube UWP GitHub repository](https://github.com/ZuneTracks/YourTube-UWP/issues).
+[UniTube UWP GitHub repository](https://github.com/ZuneTracks/YourTube-UWP/issues).

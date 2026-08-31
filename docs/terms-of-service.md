@@ -1,13 +1,13 @@
 ---
-title: YourTube UWP Terms of Service
+title: UniTube UWP Terms of Service
 ---
 
-# YourTube UWP Terms of Service
+# UniTube UWP Terms of Service
 
 **Effective date: August 28, 2026**
 
-These Terms of Service ("Terms") govern your use of the YourTube UWP application
-("YourTube" or the "App"). By installing or using the App, you agree to these
+These Terms of Service ("Terms") govern your use of the UniTube UWP application
+("UniTube" or the "App"). By installing or using the App, you agree to these
 Terms. If you do not agree, do not install or use the App.
 
 The [Privacy Policy](privacy-policy.md) explains how the App handles
@@ -15,10 +15,10 @@ information.
 
 ## The App
 
-YourTube is an independent, unofficial client for discovering public YouTube
+UniTube is an independent, unofficial client for discovering public YouTube
 content, opening YouTube's official watch pages, and, when you supply your own
 Google OAuth configuration, accessing permitted account data and uploading
-videos through the YouTube Data API. YourTube is not affiliated with, endorsed
+videos through the YouTube Data API. UniTube is not affiliated with, endorsed
 by, or sponsored by Google or YouTube.
 
 The App is provided as a Developer Mode sideload package. It is not a Microsoft
@@ -90,4 +90,4 @@ App, comply with law, or address a violation of these Terms.
 ## Contact
 
 For questions about these Terms, open an issue in the
-[YourTube UWP GitHub repository](https://github.com/ZuneTracks/YourTube-UWP/issues).
+[UniTube UWP GitHub repository](https://github.com/ZuneTracks/YourTube-UWP/issues).

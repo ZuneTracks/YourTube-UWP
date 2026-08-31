@@ -1,7 +1,7 @@
 # Microsoft Store readiness
 
 The authoritative `YouTube.Uwp.sln` source is prepared as package version
-`1.6.5.0`.
+`1.6.6.0`.
 
 ## Current status
 
@@ -9,7 +9,7 @@ The authoritative `YouTube.Uwp.sln` source is prepared as package version
 - Minimum and tested OS: `10.0.15063.0`.
 - Architecture: ARM only.
 - The release AppX is a Developer Mode sideload package signed with the
-  `YourTubeDevelopment` certificate, not a Microsoft Store package.
+  `ZuneTracks` certificate, not a Microsoft Store package.
 - The `Store | ARM` profile is configured for an unsigned Store-upload candidate
   and requires `Package.StoreAssociation.xml`.
 

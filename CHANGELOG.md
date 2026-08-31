@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.6.6.0 - UniTube rebrand
+
+- Renamed the app's public display name and documentation to **UniTube**.
+- Updated the development publisher identity to `CN=ZuneTracks`.
+- Added full-size, resolution-qualified UniTube tile assets for small, medium,
+  wide, and large tiles.
+
 ## v1.6.5.0 - User Profile release
 
 - Added an authenticated **Profile** pivot with the authorized channel summary,

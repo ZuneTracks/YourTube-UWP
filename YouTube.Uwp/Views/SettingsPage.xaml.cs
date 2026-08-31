@@ -90,7 +90,7 @@ namespace YouTube.Uwp.Views
 
             if (App.Configuration.HasBuildDefaultApiKey)
             {
-                return "Using built-in YourTube configuration for public data. Saving here overrides it.";
+                return "Using built-in UniTube configuration for public data. Saving here overrides it.";
             }
 
             return "No API key is configured.";
@@ -109,8 +109,8 @@ namespace YouTube.Uwp.Views
             else if (App.Configuration.HasBuildDefaultOAuthDeviceCredentials)
             {
                 AuthStatusText.Text = App.Configuration.HasIncompleteStoredOAuthDeviceCredentials
-                    ? "An incomplete saved OAuth override was ignored. Using built-in YourTube configuration for Profile and uploads."
-                    : "Using built-in YourTube configuration for Profile and uploads. Start Google sign-in first.";
+                    ? "An incomplete saved OAuth override was ignored. Using built-in UniTube configuration for Profile and uploads."
+                    : "Using built-in UniTube configuration for Profile and uploads. Start Google sign-in first.";
             }
             else if (App.Configuration.HasOAuthDeviceCredentials)
             {
@@ -303,14 +303,14 @@ namespace YouTube.Uwp.Views
 
             panel.Children.Add(new TextBlock
             {
-                Text = "YourTube UWP",
+                Text = "UniTube UWP",
                 FontSize = 20,
                 FontWeight = Windows.UI.Text.FontWeights.SemiBold,
                 Margin = new Thickness(0, 0, 0, 6)
             });
             panel.Children.Add(new TextBlock
             {
-                Text = "YourTube is a modern UWP application for browsing YouTube via YouTube's public API.",
+                Text = "UniTube is a modern UWP application for browsing YouTube via YouTube's public API.",
                 TextWrapping = TextWrapping.Wrap,
                 Margin = new Thickness(0, 0, 0, 8)
             });

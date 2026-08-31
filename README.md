@@ -1,6 +1,6 @@
-# YourTube UWP
+# UniTube UWP
 
-`YouTube.Uwp.sln` contains the YourTube UWP app for Windows 10 Mobile Creators Update
+`YouTube.Uwp.sln` contains the UniTube UWP app for Windows 10 Mobile Creators Update
 (10.0.15063.0) and later. The recovered WP8 projects remain in their original
 folders and are not referenced by the UWP project. Only the existing image files
 are linked as package assets; no recovered application code, token handling, stream
@@ -8,9 +8,9 @@ handling, or binary libraries are reused.
 
 [Terms of Service](docs/terms-of-service.md) | [Privacy Policy](docs/privacy-policy.md)
 
-## Current release: v1.6.5.0
+## Current release: v1.6.6.0
 
-v1.6.5.0 is the current YourTube UWP release. It adds a foreground YouTube
+v1.6.6.0 is the current UniTube UWP release. It adds a foreground YouTube
 video-upload prototype with Google limited-input-device authorization, resumable
 transfers, cancellation, determinate progress, and persistent redacted
 diagnostics. It also restores the Settings **About** flyout from the recovered
@@ -26,7 +26,7 @@ public development certificate, required ARM framework packages, and deployment
 instructions. See [CHANGELOG.md](CHANGELOG.md) for the complete release history.
 
 This is not a Microsoft Store or production-signed distribution: the package uses
-the documented `YourTubeDevelopment` temporary development certificate. Do not
+the documented `ZuneTracks` temporary development certificate. Do not
 redistribute a private PFX file. Before publishing a production distribution,
 replace the publisher identity and development certificate with your own production
 signing configuration.
@@ -87,7 +87,7 @@ revoke or rotate them in their original provider consoles.
 
 ### Local Visual Studio 2017 build defaults
 
-This support is included in `v1.6.5.0`. Work from an up-to-date `main`
+This support is included in `v1.6.6.0`. Work from an up-to-date `main`
 checkout, not an older source archive or a generated deployment ZIP. In Visual
 Studio 2017, expand **YourTube > Services** and open
 `LocalBuildConfiguration.cs.template`. If it is not visible, select **Show All Files**
@@ -116,7 +116,7 @@ The checked-in project intentionally does not contain a private signing certific
 its default local AppX output is unsigned. To deploy with the Visual Studio debugger:
 
 1. In **YourTube > Properties > Packaging**, create a test certificate whose subject
-   is `CN=YourTubeDevelopment`, install it in the current user's certificate store,
+   is `CN=ZuneTracks`, install it in the current user's certificate store,
    and copy its thumbprint.
 2. Copy `YouTube.Uwp\LocalPackageSigning.props.template` to
    `YouTube.Uwp\LocalPackageSigning.props`, replace
@@ -126,15 +126,15 @@ its default local AppX output is unsigned. To deploy with the Visual Studio debu
 
 `LocalPackageSigning.props` is ignored by Git. If `DEP0001` reports
 `0x80070490` (**Element not found**), remove an older developer/sideload
-installation of YourTube from the phone, restart it, confirm both ARM framework
-dependencies are installed, and deploy again. The source package version is `1.6.5.0`;
-it must be newer than any installed YourTube package. The published release deployment
+installation of UniTube from the phone, restart it, confirm both ARM framework
+dependencies are installed, and deploy again. The source package version is `1.6.6.0`;
+it must be newer than any installed UniTube package. The published release deployment
 ZIP installs its matching certificate and dependencies automatically.
 
-The app is packaged as **YourTube**. Its package identity, development publisher,
+The app is packaged as **UniTube**. Its package identity, development publisher,
 and Credential Locker resource names are separate from earlier
 `YouTubeReconstructed` development packages, so re-enter runtime configuration
-after installing YourTube.
+after installing UniTube.
 
 ## Implemented public API v3 mappings
 
@@ -173,10 +173,10 @@ collection, so the app does not pretend to provide them.
 
 ### Trending live tile
 
-After a successful **Trending Now** request, YourTube persists the leading public
+After a successful **Trending Now** request, UniTube persists the leading public
 result and refreshes a UWP live-tile queue. After a user starts playback, that
 queue rotates the last-played video, the latest Trending Now result, and a branded
-YourTube app-icon tile. When there is no last-played metadata, the tile falls back
+UniTube app-icon tile. When there is no last-played metadata, the tile falls back
 to the latest Trending Now result and the branded tile. Only public video metadata
 (ID, title, channel, and thumbnail URI) is stored in local app settings; API keys,
 OAuth tokens, and media URLs are never included.

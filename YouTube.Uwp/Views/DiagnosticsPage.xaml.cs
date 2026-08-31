@@ -39,7 +39,7 @@ namespace YouTube.Uwp.Views
         {
             FileSavePicker picker = new FileSavePicker();
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            picker.SuggestedFileName = "YourTube-diagnostics";
+            picker.SuggestedFileName = "UniTube-diagnostics";
             picker.FileTypeChoices.Add("Text file", new[] { ".txt" });
 
             try
