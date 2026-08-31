@@ -8,11 +8,11 @@ UniTube is an original UWP client for Windows 10 Mobile 10.0.15063 (Creators
 Update) and later. It is designed for ARM devices and uses the official YouTube
 Data API v3 for public discovery features.
 
-## Latest release: v1.6.5.0
+## Latest release: v1.6.6.0
 
-[Download the ARM Developer Mode sideload package](https://github.com/ZuneTracks/YourTube-UWP/releases/tag/v1.6.5.0)
+[Download the ARM Developer Mode sideload package](https://github.com/ZuneTracks/UniTube/releases/tag/v1.6.6.0)
 
-The `v1.6.5.0` release adds the authenticated User Profile pivot, uploaded
+The `v1.6.6.0` release adds the authenticated User Profile pivot, uploaded
 videos, subscriptions, playlists, liked videos, and collapsible profile
 sections. It retains the foreground video-upload prototype with Google
 limited-input-device authorization, resumable uploads, cancellation,
