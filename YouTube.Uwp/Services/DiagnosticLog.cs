@@ -32,7 +32,7 @@ namespace YouTube.Uwp.Services
             }
             catch (Exception exception)
             {
-                Debug.WriteLine("YourTube diagnostic write failed: " + exception.HResult.ToString("X8"));
+                Debug.WriteLine("UniTube diagnostic write failed: " + exception.HResult.ToString("X8"));
             }
         }
 

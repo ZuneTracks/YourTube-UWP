@@ -1,10 +1,10 @@
 ---
-title: YourTube UWP
+title: UniTube UWP
 ---
 
-# YourTube UWP
+# UniTube UWP
 
-YourTube is an original UWP client for Windows 10 Mobile 10.0.15063 (Creators
+UniTube is an original UWP client for Windows 10 Mobile 10.0.15063 (Creators
 Update) and later. It is designed for ARM devices and uses the official YouTube
 Data API v3 for public discovery features.
 
@@ -22,7 +22,7 @@ live-tile refresh fix and rotating behavior for the latest video metadata:
 
 - The last video selected for playback.
 - The latest public Trending Now result.
-- A branded YourTube app-icon frame.
+- A branded UniTube app-icon frame.
 
 Without a previously played video, the tile starts with Trending Now. The tile
 stores only public video metadata locally and does not expose API keys, OAuth
