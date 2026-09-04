@@ -88,6 +88,7 @@
   <ItemGroup>
     <Reference Include="Windows">
       <HintPath>$(TargetPlatformSdkPath)UnionMetadata\$(TargetPlatformVersion)\Windows.winmd</HintPath>
+      <Private>false</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -203,4 +204,12 @@
     <Error Condition="!Exists('$(MSBuildProjectDirectory)\Package.StoreAssociation.xml')" Text="Store packaging requires Package.StoreAssociation.xml. Use Publish &gt; Associate App with the Store after reserving the app name in Partner Center; do not replace it with invented identity values." />
   </Target>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <Target Name="ExcludeSdkMetadataFromStorePackage"
+          AfterTargets="_AddUnionWinmd;_AddFxWinmd"
+          Condition="'$(UapAppxPackageBuildMode)' == 'StoreUpload'">
+    <ItemGroup>
+      <PackagingOutputs Remove="@(UnionMetadataWinmd)" />
+      <PackagingOutputs Remove="@(WinmdsFromFrameworkSDKs)" />
+    </ItemGroup>
+  </Target>
 </Project>
