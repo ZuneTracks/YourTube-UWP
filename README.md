@@ -8,14 +8,13 @@ handling, or binary libraries are reused.
 
 [Terms of Service](docs/terms-of-service.md) | [Privacy Policy](docs/privacy-policy.md)
 
-## Current release: v1.6.6.0
+## Current release: v1.6.7.0
 
-v1.6.6.0 is the current UniTube UWP release. It adds a foreground YouTube
-video-upload prototype with Google limited-input-device authorization, resumable
-transfers, cancellation, determinate progress, and persistent redacted
-diagnostics. It also restores the Settings **About** flyout from the recovered
-1.0.9.0 source and ensures saved OAuth values cannot be mixed with embedded
-local defaults.
+v1.6.7.0 adds Safe Mode, which is enabled by default and uses YouTube Data API
+v3's strict SafeSearch setting for public video searches. Settings now presents
+**About** before the credential and safety controls, with **View Diagnostics**
+at the bottom of the page. The release also adds x64 Visual Studio build
+configurations alongside the existing ARM device configurations.
 
 The ARM Windows 10 Mobile Developer Mode sideload release supports devices
 running 10.0.15063.0 or later. The pinned live-tile refresh behavior from
@@ -87,7 +86,7 @@ revoke or rotate them in their original provider consoles.
 
 ### Local Visual Studio 2017 build defaults
 
-This support is included in `v1.6.6.0`. Work from an up-to-date `main`
+This support is included in `v1.6.7.0`. Work from an up-to-date `main`
 checkout, not an older source archive or a generated deployment ZIP. In Visual
 Studio 2017, expand **YourTube > Services** and open
 `LocalBuildConfiguration.cs.template`. If it is not visible, select **Show All Files**
@@ -127,7 +126,7 @@ its default local AppX output is unsigned. To deploy with the Visual Studio debu
 `LocalPackageSigning.props` is ignored by Git. If `DEP0001` reports
 `0x80070490` (**Element not found**), remove an older developer/sideload
 installation of UniTube from the phone, restart it, confirm both ARM framework
-dependencies are installed, and deploy again. The source package version is `1.6.6.0`;
+dependencies are installed, and deploy again. The source package version is `1.6.7.0`;
 it must be newer than any installed UniTube package. The published release deployment
 ZIP installs its matching certificate and dependencies automatically.
 

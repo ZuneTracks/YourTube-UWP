@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.6.7.0 - Safe Mode release
+
+- Added a Settings **Safe Mode** toggle, enabled by default, that uses YouTube
+  Data API v3 strict SafeSearch for public video searches.
+- Documented Safe Mode's scope: it is not a YouTube Kids integration and does
+  not filter popular, category, or authenticated account feeds.
+- Moved **About** to the top of Settings and **View Diagnostics** to the bottom.
+- Added x64 Debug, Release, and Store build configurations alongside the
+  existing ARM configurations.
+- Updated the package version to `1.6.7.0`.
+
 ## v1.6.6.0 - UniTube rebrand
 
 - Renamed the app's public display name and documentation to **UniTube**.
