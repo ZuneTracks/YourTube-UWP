@@ -10,6 +10,7 @@ namespace YouTube.Uwp.Services
         private const string OAuthClientIdKey = "OAuthClientId";
         private const string OAuthClientSecretResource = "YourTube.OAuthClientSecret";
         private const string OAuthClientSecretUserName = "LimitedInputDevice";
+        private const string SafeModeEnabledKey = "SafeModeEnabled";
 
         public string OAuthClientId
         {
@@ -67,6 +68,25 @@ namespace YouTube.Uwp.Services
         public bool HasBuildDefaultApiKey
         {
             get { return !string.IsNullOrWhiteSpace(GetBuildDefaultApiKey()); }
+        }
+
+        public bool IsSafeModeEnabled
+        {
+            get
+            {
+                object value;
+                if (!ApplicationData.Current.LocalSettings.Values.TryGetValue(SafeModeEnabledKey, out value))
+                {
+                    return true;
+                }
+
+                return value is bool ? (bool)value : true;
+            }
+        }
+
+        public void SetSafeModeEnabled(bool isEnabled)
+        {
+            ApplicationData.Current.LocalSettings.Values[SafeModeEnabledKey] = isEnabled;
         }
 
         public string GetApiKey()

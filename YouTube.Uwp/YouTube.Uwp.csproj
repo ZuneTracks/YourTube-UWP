@@ -75,9 +75,6 @@
     <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
     <StorePackage>true</StorePackage>
   </PropertyGroup>
-  <PropertyGroup Condition="Exists('$(MSBuildProjectDirectory)\Services\LocalBuildConfiguration.cs')">
-    <DefineConstants>$(DefineConstants);LOCAL_BUILD_CONFIGURATION</DefineConstants>
-  </PropertyGroup>
   <Import Project="LocalPackageSigning.props" Condition="Exists('$(MSBuildProjectDirectory)\LocalPackageSigning.props')" />
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="5.2.9" />
@@ -204,6 +201,13 @@
   </ItemGroup>
   <Target Name="ValidateStoreIdentity" BeforeTargets="PrepareForBuild" Condition="'$(StorePackage)' == 'true'">
     <Error Condition="!Exists('$(MSBuildProjectDirectory)\Package.StoreAssociation.xml')" Text="Store packaging requires Package.StoreAssociation.xml. Use Publish &gt; Associate App with the Store after reserving the app name in Partner Center; do not replace it with invented identity values." />
+  </Target>
+  <Target Name="EnableLocalBuildConfiguration"
+          BeforeTargets="CoreCompile"
+          Condition="Exists('$(MSBuildProjectDirectory)\Services\LocalBuildConfiguration.cs')">
+    <PropertyGroup>
+      <DefineConstants>$(DefineConstants);LOCAL_BUILD_CONFIGURATION</DefineConstants>
+    </PropertyGroup>
   </Target>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <Target Name="ExcludeSdkMetadataFromStorePackage"

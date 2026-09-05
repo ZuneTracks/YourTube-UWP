@@ -38,6 +38,14 @@
                     </StackPanel>
                 </Border>
 
+                <Border Background="{StaticResource PhoneSurfaceBrush}" Padding="14" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="safe mode" Style="{StaticResource PhoneSectionTitleStyle}" />
+                        <ToggleSwitch x:Name="SafeModeToggle" Header="Use strict SafeSearch for public video searches" Toggled="SafeModeToggle_Toggled" />
+                        <TextBlock Text="Safe Mode uses YouTube's strict SafeSearch setting for searches. It does not provide the YouTube Kids catalog or filter popular, category, and account feeds." Style="{StaticResource PhoneMetadataStyle}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
                 <Border Background="{StaticResource PhoneSurfaceBrush}" Padding="14">
                     <StackPanel>
                         <TextBlock Text="google account" Style="{StaticResource PhoneSectionTitleStyle}" />

@@ -39,7 +39,9 @@ namespace YouTube.Uwp
             UploadedVideos = new ObservableCollection<VideoSummary>();
             LikedVideos = new ObservableCollection<VideoSummary>();
             DataContext = this;
-            client = new YouTubeDataApiClient(App.Configuration.GetApiKey);
+            client = YouTubeDataApiClient.CreatePublicClient(
+                App.Configuration.GetApiKey,
+                () => App.Configuration.IsSafeModeEnabled);
             OAuthDeviceAuthorizationService oauthService = new OAuthDeviceAuthorizationService(App.Configuration);
             authenticatedClient = new YouTubeDataApiClient(App.Configuration.GetApiKey, oauthService.GetValidAccessTokenAsync);
             trendingTileService = new TrendingTileService();

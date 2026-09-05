@@ -140,7 +140,7 @@ after installing UniTube.
 
 | App function | Official YouTube Data API v3 request |
 | --- | --- |
-| Search public videos | `GET https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=...` |
+| Search public videos | `GET https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=...&safeSearch=moderate` (`strict` when Safe Mode is enabled) |
 | Trending / popular by region | `GET https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics,status&chart=mostPopular&regionCode=...` |
 | Category choices by region | `GET https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=...` |
 | Popular videos in a selected category | `GET https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics,status&chart=mostPopular&videoCategoryId=...&regionCode=...` |
@@ -151,6 +151,13 @@ The public client maps results into platform-independent `VideoSummary`,
 `VideoDetails`, and `ChannelDetails` DTOs. This replaces the recovered model types
 that inherit WP8 `ResultItem`, dispatch through WP8 view-model singletons, and
 contain platform-specific commands and transfer objects.
+
+### Safe Mode
+
+Settings includes a persisted **Safe Mode** toggle, enabled by default, that changes public video searches
+to YouTube Data API v3's `safeSearch=strict` filter. It is not a YouTube Kids
+integration and cannot filter popular, category, or authenticated account feeds,
+because those endpoints do not support the `safeSearch` parameter.
 
 ### Authenticated Profile pivot
 

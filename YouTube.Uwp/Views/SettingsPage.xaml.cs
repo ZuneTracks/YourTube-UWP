@@ -31,6 +31,7 @@ namespace YouTube.Uwp.Views
             authorizationCountdownTimer.Tick += AuthorizationCountdownTimer_Tick;
             ApiKeyStatusText.Text = GetApiKeyStatus();
             OAuthClientIdBox.Text = App.Configuration.StoredOAuthClientId ?? string.Empty;
+            SafeModeToggle.IsOn = App.Configuration.IsSafeModeEnabled;
             UpdateAuthorizationStatus();
         }
 
@@ -74,6 +75,11 @@ namespace YouTube.Uwp.Views
             App.Configuration.ClearApiKey();
             ApiKeyBox.Password = string.Empty;
             ApiKeyStatusText.Text = GetApiKeyStatus();
+        }
+
+        private void SafeModeToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            App.Configuration.SetSafeModeEnabled(SafeModeToggle.IsOn);
         }
 
         private void DiagnosticsButton_Click(object sender, RoutedEventArgs e)

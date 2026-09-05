@@ -41,20 +41,37 @@ namespace YouTube.Uwp.Services
         private readonly HttpClient httpClient;
         private readonly Func<string> apiKeyProvider;
         private readonly Func<Task<string>> accessTokenProvider;
+        private readonly Func<bool> safeModeProvider;
 
         public YouTubeDataApiClient(Func<string> apiKeyProvider)
-            : this(apiKeyProvider, null, new HttpClient())
+            : this(apiKeyProvider, null, null, new HttpClient())
         {
         }
 
         public YouTubeDataApiClient(Func<string> apiKeyProvider, Func<Task<string>> accessTokenProvider)
-            : this(apiKeyProvider, accessTokenProvider, new HttpClient())
+            : this(apiKeyProvider, accessTokenProvider, null, new HttpClient())
+        {
+        }
+
+        public static YouTubeDataApiClient CreatePublicClient(
+            Func<string> apiKeyProvider,
+            Func<bool> safeModeProvider)
+        {
+            return new YouTubeDataApiClient(apiKeyProvider, null, safeModeProvider, new HttpClient());
+        }
+
+        public YouTubeDataApiClient(
+            Func<string> apiKeyProvider,
+            Func<Task<string>> accessTokenProvider,
+            HttpClient httpClient)
+            : this(apiKeyProvider, accessTokenProvider, null, httpClient)
         {
         }
 
         public YouTubeDataApiClient(
             Func<string> apiKeyProvider,
             Func<Task<string>> accessTokenProvider,
+            Func<bool> safeModeProvider,
             HttpClient httpClient)
         {
             if (apiKeyProvider == null)
@@ -69,6 +86,7 @@ namespace YouTube.Uwp.Services
 
             this.apiKeyProvider = apiKeyProvider;
             this.accessTokenProvider = accessTokenProvider;
+            this.safeModeProvider = safeModeProvider;
             this.httpClient = httpClient;
         }
 
@@ -83,7 +101,7 @@ namespace YouTube.Uwp.Services
             parameters.Add("part", "snippet");
             parameters.Add("type", "video");
             parameters.Add("q", query.Trim());
-            parameters.Add("safeSearch", "moderate");
+            parameters.Add("safeSearch", safeModeProvider != null && safeModeProvider() ? "strict" : "moderate");
             parameters.Add("order", "relevance");
 
             JsonObject response = await GetPublicJsonAsync("search", parameters);
